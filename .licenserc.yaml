@@ -27,6 +27,9 @@ header:
     - '.gitignore'
     - 'LICENSE'
     - '**/**.md'
+    - '**/**.xml'
+    - '**/**.iml'
+    - '**/resources/**'
 
   comment: on-failure
 
