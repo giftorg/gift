@@ -90,7 +90,7 @@ public class BigModelNew extends WebSocketListener {
         if(totalFlag){
             Scanner scanner=new Scanner(System.in);
             totalFlag=false;
-            NewQuestion= "请你帮我将冒号后的文本中所有用到的技术和你任务的关键词选出来，并以英文逗号分割，注意不要有多余的废话：" + tanslation;
+            NewQuestion= "不要有多余的废话！请你帮我将冒号后的文本中所有用到的技术和你任务的关键词选出来，并以英文逗号分割：" + tanslation;
 // 构建鉴权url
             String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
             OkHttpClient client = new OkHttpClient.Builder().build();
@@ -115,7 +115,7 @@ public class BigModelNew extends WebSocketListener {
         if(totalFlag){
             Scanner scanner=new Scanner(System.in);
             totalFlag=false;
-            NewQuestion= "请你帮我将冒号后的文本（除了术语或者技术之外）翻译为中文，如果本身就是中文的话，就原样输出即可，不要有多余的废话：" + docContent;
+            NewQuestion= "不要有多余的废话！请你帮我将冒号后的文本（除了术语或者技术之外）翻译为中文，如果本身就是中文的话，就原样输出即可：" + docContent;
 // 构建鉴权url
             String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
             OkHttpClient client = new OkHttpClient.Builder().build();
@@ -214,7 +214,7 @@ public class BigModelNew extends WebSocketListener {
         }
         if (myJsonParse.header.status == 2) {
             // 可以关闭连接，释放资源
-            System.out.println();
+//            System.out.println();
             RoleContent roleContent=new RoleContent();
             roleContent.setRole("assistant");
             roleContent.setContent(totalAnswer);
