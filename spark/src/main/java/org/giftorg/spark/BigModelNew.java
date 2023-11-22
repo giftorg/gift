@@ -84,38 +84,11 @@ public class BigModelNew extends WebSocketListener {
     new BigModelNew(userId,wsCloseFlag);
     }
 
-    // 用模型打标签的方法
-    public ArrayList<String> modelTags(String tanslation) throws Exception {
-        ArrayList<String> tags = new ArrayList<>();
+    public String Chat(String Question) throws Exception {
         if(totalFlag){
             Scanner scanner=new Scanner(System.in);
             totalFlag=false;
-            NewQuestion= "不要有多余的废话！请你帮我将冒号后的文本中所有用到的技术和你任务的关键词选出来，并以英文逗号分割：" + tanslation;
-// 构建鉴权url
-            String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
-            OkHttpClient client = new OkHttpClient.Builder().build();
-            String url = authUrl.toString().replace("http://", "ws://").replace("https://", "wss://");
-            Request request = new Request.Builder().url(url).build();
-            for (int i = 0; i < 1; i++) {
-                totalAnswer="";
-                BigModelNew model = new BigModelNew(i + "", false);
-                WebSocket webSocket = client.newWebSocket(request, model);
-                model.latch.await();
-            }
-        }else{
-            Thread.sleep(200);
-        }
-        String[] items = totalAnswer.split(",");
-        tags = new ArrayList<>(Arrays.asList(items));
-        return tags;
-    }
-
-    // 用模型翻译的方法
-    public String modelTranslate(String docContent) throws Exception {
-        if(totalFlag){
-            Scanner scanner=new Scanner(System.in);
-            totalFlag=false;
-            NewQuestion= "不要有多余的废话！请你帮我将冒号后的文本（除了术语或者技术之外）翻译为中文，如果本身就是中文的话，就原样输出即可：" + docContent;
+            NewQuestion= Question;
 // 构建鉴权url
             String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
             OkHttpClient client = new OkHttpClient.Builder().build();
@@ -132,6 +105,7 @@ public class BigModelNew extends WebSocketListener {
         }
         return totalAnswer;
     }
+
 
 
     // 线程来发送音频与参数
