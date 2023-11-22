@@ -69,14 +69,14 @@ class Project {
 
     public String translateToProject(String doc) throws Exception { // 在这里编写使用星火大模型分析文档内容，获取标签列表的代码逻辑
         BigModelNew model = new BigModelNew();// 假设已经实现了一个名为StarfireModel的类
-        String answer = model.Chat("不要有多余的废话！请你帮我将冒号后的文本（除了术语或者技术之外）" +
+        String answer = model.chat("不要有多余的废话！请你帮我将冒号后的文本（除了术语或者技术之外）" +
                 "翻译为中文，如果本身就是中文的话，就原样输出即可："+this.docContent);    ////发送一个问题，返回一个字符串类型的答案
         return answer;//返回回答（翻译内容）
     }
 
     public ArrayList<String> taggingToProject(String translation) throws Exception { // 在这里编写使用星火大模型分析文档内容，获取标签列表的代码逻辑
         BigModelNew model = new BigModelNew();// new一个名为model的BigModelNew类
-        String answer = model.Chat("不要有多余的废话！" +
+        String answer = model.chat("不要有多余的废话！" +
                 "请你帮我将冒号后的文本中所有用到的技术和你任务的关键词选出来，并以英文逗号分割：" + this.getTranslation());
             //发送一个问题，返回一个字符串类型的答案
         //……如果获得的answer不满意可以在此处接着添加代码，用第三方模块进行筛选，如jieba等

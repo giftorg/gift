@@ -84,7 +84,7 @@ public class BigModelNew extends WebSocketListener {
     new BigModelNew(userId,wsCloseFlag);
     }
 
-    public String Chat(String Question) throws Exception {
+    public String chat(String Question) throws Exception {
         if(totalFlag){
             Scanner scanner=new Scanner(System.in);
             totalFlag=false;
