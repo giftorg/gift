@@ -1,3 +1,4 @@
 .idea/
 target/
-config.yaml
+**/config.yaml
+**/mybatis-config.xml
