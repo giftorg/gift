@@ -15,17 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# 定义一个枚举类
 from enum import Enum
 
+
 class Languages(Enum):
+    """
+    编程语言列表枚举
+    """
+
     JAVA = 'Java'
     PYTHON = 'Python'
-    CPLUS = 'C++'
+    C_PLUS = 'C++'
     C = 'C'
     GO = 'Go'
-    JAVASCRIPT = 'JavaScript'
+    JAVA_SCRIPT = 'JavaScript'
     PHP = 'PHP'
     RUBY = 'Ruby'
     SHELL = 'shell'
-    TYPESCRIPT = 'Typescript'
+    TYPE_SCRIPT = 'Typescript'

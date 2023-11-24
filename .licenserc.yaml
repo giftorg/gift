@@ -30,7 +30,9 @@ header:
     - '**/**.xml'
     - '**/**.iml'
     - '**/resources/**'
+    - '**/**.yml'
     - '**/**.yaml'
+    - '**/**.sql'
 
   comment: on-failure
 
