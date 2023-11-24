@@ -2,3 +2,4 @@
 target/
 **/config.yaml
 **/mybatis-config.xml
+**/**.pyc
