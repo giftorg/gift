@@ -21,6 +21,10 @@ package org.giftorg.spark.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 @Slf4j
 public class CmdUtil {
     /**
@@ -31,12 +35,28 @@ public class CmdUtil {
     public static Boolean exec(String name, String... arg) {
         String cmd = name + " " + String.join(" ", arg);
         try {
-            Runtime.getRuntime().exec(cmd);
+            Process process = Runtime.getRuntime().exec(cmd);
+
+            InputStream stdout = process.getInputStream();
+            InputStream stderr = process.getErrorStream();
+
+            BufferedReader stdoutReader = new BufferedReader(new InputStreamReader(stdout));
+            BufferedReader stderrReader = new BufferedReader(new InputStreamReader(stderr));
+            String line;
+            while ((line = stdoutReader.readLine()) != null) {
+                log.info("[exec stdout] " + line);
+            }
+            while ((line = stderrReader.readLine()) != null) {
+                log.info("[exec stderr] " + line);
+            }
+            stdoutReader.close();
+            stderrReader.close();
+
+            return process.waitFor() == 0;
         } catch (Exception e) {
             log.error("exec cmd error: {}", cmd, e);
             return false;
         }
-        return true;
     }
 }
 

@@ -19,11 +19,14 @@
 
 package org.giftorg.spark.utils;
 
+import cn.hutool.core.io.FileUtil;
+
 public class GitUtil {
     /**
      * git clone project to local
      */
     public static Boolean gitClone(String remote, String local) {
+        remote = remote.replace("https://github.com/", "https://githubfast.com/");
         String cmd = "git clone " + remote + " " + local;
         return CmdUtil.exec(cmd);
     }

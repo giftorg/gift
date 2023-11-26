@@ -17,78 +17,52 @@
  * limitations under the License.
  */
 
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.giftorg.spark.dao.HDFSDao;
 import org.giftorg.spark.entity.Project;
-import org.giftorg.spark.mapper.ProjectMapper;
-import org.giftorg.spark.utils.GitUtil;
-import org.giftorg.spark.utils.PathUtil;
-import org.giftorg.spark.utils.StringUtil;
+import org.giftorg.spark.service.ProjectService;
+import org.giftorg.spark.service.impl.ProjectServiceImpl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class Application {
+    private static final ProjectService projectService = new ProjectServiceImpl();
+
     public static void main(String[] args) {
+        List<Project> projects = projectService.getProjectList();
 
-        List<Project> projects = null;
-        try {
-            projects = getProjectList();
-        } catch (IOException e) {
-            log.error("get project list error: {}", e.getMessage());
-            System.exit(1);
-        }
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
 
-        projects.subList(100, 110).forEach(project -> {
-            String remote = project.getRepository();
-            String local = FileUtil.getAbsolutePath(PathUtil.join("repos", PathUtil.base(remote)));
-
-            // 拉取项目到本地
-            Boolean ok = GitUtil.gitClone(remote, local);
-
-            // 上传到HDFS
-            if (ok) {
-                log.info("git clone success. remote: {}, local: {}", remote, local);
-                try {
-                    String hdfsUrl = HDFSDao.hdfsRepoPath("/" + PathUtil.base(StringUtil.trimEnd(remote, "/" + PathUtil.base(remote))));
-                    log.info("put repository {} to HDFS: {}", remote, hdfsUrl);
-                    HDFSDao.put(local, hdfsUrl);
-                } catch (Exception e) {
-                    log.error("put repository {} to HDFS error: {}", remote, e.getMessage());
-                }
-            } else {
-                log.error("git clone failed. remote: {}", remote);
-            }
-
-            // 删除本地项目
-            try {
-                FileUtil.del(local);
-            } catch (Exception e) {
-                log.warn("delete local repository {} error: {}", local, e.getMessage());
-            }
+        projects.subList(40, 50).forEach(project -> {
+            executorService.submit(new AThread(project));
         });
     }
 
-    private static List<Project> getProjectList() throws IOException {
-        String resource = "mybatis-config.xml";
-        InputStream inputStream = Resources.getResourceAsStream(resource);
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
 
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-
-        ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
-        List<Project> projectList = mapper.selectList();
-
-        sqlSession.close();
-
-        return projectList;
-    }
 }
 
+@Slf4j
+class AThread extends Thread {
+    private static final ProjectService projectService = new ProjectServiceImpl();
+
+    private final Project project;
+
+    public AThread(Project project) {
+        this.project = project;
+    }
+
+
+    /**
+     * run 处理单个项目
+     */
+    @Override
+    public void run() {
+        String remote = project.getRepository();
+        if (!projectService.cloneAndPutProject(remote)) {
+            // TODO 重试
+            log.error("clone and put project {} failed", remote);
+        }
+    }
+}

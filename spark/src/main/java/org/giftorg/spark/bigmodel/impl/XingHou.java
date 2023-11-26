@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package org.giftorg.spark.bigmodel;
+package org.giftorg.spark.bigmodel.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.giftorg.spark.bigmodel.BigModel;
 import org.giftorg.spark.config.Config;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
-public class XingHou extends WebSocketListener {
+public class XingHou extends WebSocketListener implements BigModel {
     private static final String hostUrl = Config.xingHouConfig.getHostUrl();
     private static final String appid = Config.xingHouConfig.getAppid();
     private static final String apiSecret = Config.xingHouConfig.getApiSecret();
@@ -58,7 +59,7 @@ public class XingHou extends WebSocketListener {
     /**
      * 聊天接口，接收一个消息列表，返回大模型回复的消息
      */
-    public static String chat(List<Message> messages) throws Exception {
+    public String chat(List<Message> messages) throws Exception {
         log.info("chat request: {}", messages);
         OkHttpClient client = new OkHttpClient.Builder().build();
         String url = getAuthUrl().replace("http://", "ws://").replace("https://", "wss://");

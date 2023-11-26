@@ -22,8 +22,8 @@ package org.giftorg.spark.entity;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.giftorg.spark.bigmodel.ChatGPT;
-import org.giftorg.spark.bigmodel.Message;
+import org.giftorg.spark.bigmodel.BigModel;
+import org.giftorg.spark.bigmodel.impl.ChatGPT;
 import org.giftorg.spark.utils.CharsetUtil;
 
 import java.util.ArrayList;
@@ -61,10 +61,12 @@ public class Project {
         if (isTranslated) return translation;
 
         if (!CharsetUtil.isChinese(document)) {
-            List<Message> messages = new ArrayList<>();
-            messages.add(new Message("system", "Translate the content provided by the user into Chinese.\nInput example: \"hello.\"\nOutput example: \"你好。\""));
-            messages.add(new Message("user", document));
-            translation = ChatGPT.chat(messages);
+            List<BigModel.Message> messages = new ArrayList<>();
+            messages.add(new BigModel.Message("system", "Translate the content provided by the user into Chinese.\nInput example: \"hello.\"\nOutput example: \"你好。\""));
+            messages.add(new BigModel.Message("user", document));
+
+            BigModel model = new ChatGPT();
+            translation = model.chat(messages);
         } else {
             translation = document;
         }
@@ -77,11 +79,12 @@ public class Project {
     public List<String> tags() throws Exception {
         if (isTagged) return tags;
 
-        List<Message> messages = new ArrayList<>();
-        messages.add(new Message("system", "Based on the user-inputted project documents, generate a list of Chinese keywords related to the project. Provide the answer in the format of comma-separated English keywords.\nAnswer example: \"Java,MySQL,Redis,管理系统,电商\"\n"));
-        messages.add(new Message("user", document));
+        List<BigModel.Message> messages = new ArrayList<>();
+        messages.add(new BigModel.Message("system", "Based on the user-inputted project documents, generate a list of Chinese keywords related to the project. Provide the answer in the format of comma-separated English keywords.\nAnswer example: \"Java,MySQL,Redis,管理系统,电商\"\n"));
+        messages.add(new BigModel.Message("user", document));
 
-        String answer = ChatGPT.chat(messages);
+        BigModel model = new ChatGPT();
+        String answer = model.chat(messages);
         tags = Arrays.asList(answer.split(",\\s*"));
         isTagged = true;
         return tags;

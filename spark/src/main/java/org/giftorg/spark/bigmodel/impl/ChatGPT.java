@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package org.giftorg.spark.bigmodel;
+package org.giftorg.spark.bigmodel.impl;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -25,13 +25,14 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.giftorg.spark.bigmodel.BigModel;
 import org.giftorg.spark.config.Config;
 import org.giftorg.spark.utils.StringUtil;
 
 import java.util.List;
 
 @Slf4j
-public class ChatGPT {
+public class ChatGPT implements BigModel {
     private static final String baseUrl = StringUtil.trimEnd(Config.chatGPTConfig.getBaseUrl(), "/");
     private static final String apiKey = Config.chatGPTConfig.getApiKey();
     private static final String model = Config.chatGPTConfig.getModel();
@@ -40,7 +41,7 @@ public class ChatGPT {
     /**
      * 聊天接口，接收一个消息列表，返回大模型回复的消息
      */
-    public static String chat(List<Message> messages) throws Exception {
+    public String chat(List<Message> messages) throws Exception {
         Request req = new Request(model, messages);
         log.info("chat request: {}", messages);
 

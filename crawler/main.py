@@ -85,6 +85,7 @@ def init_task_queue() -> Queue:
 
 if __name__ == '__main__':
     pd = ProjectDao('localhost', 3306, 'root', 'root', 'test')
+    # pd = ProjectDao('139.9.65.13', 23306, 'root', 'root', 'test')
 
     task_queue = init_task_queue()
     project_list: List[Project] = list()

@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GitUtilTest {
     @Test
     void testGitClone() throws IOException {
-        String remote = "https://github.com/crazycodeboy/TakePhoto";
+        String remote = "https://github.com/giftorg/gift";
         String local = FileUtil.getAbsolutePath(PathUtil.join("git_test", PathUtil.base(remote)));
 
         Boolean ok = GitUtil.gitClone(remote, local);
