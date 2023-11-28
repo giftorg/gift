@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
-public class XingHou extends WebSocketListener implements BigModel {
+public class XingHuo extends WebSocketListener implements BigModel {
     private static final String hostUrl = Config.xingHouConfig.getHostUrl();
     private static final String appid = Config.xingHouConfig.getAppid();
     private static final String apiSecret = Config.xingHouConfig.getApiSecret();
@@ -51,7 +51,7 @@ public class XingHou extends WebSocketListener implements BigModel {
     public String answer = "";
     private final CountDownLatch latch;
 
-    public XingHou(List<Message> messages) {
+    public XingHuo(List<Message> messages) {
         this.messages = messages;
         this.latch = new CountDownLatch(1);
     }
@@ -65,7 +65,7 @@ public class XingHou extends WebSocketListener implements BigModel {
         String url = getAuthUrl().replace("http://", "ws://").replace("https://", "wss://");
         Request request = new Request.Builder().url(url).build();
 
-        XingHou bigModel = new XingHou(messages);
+        XingHuo bigModel = new XingHuo(messages);
         client.newWebSocket(request, bigModel);
         bigModel.latch.await();
         client.dispatcher().executorService().shutdown();

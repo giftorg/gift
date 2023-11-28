@@ -10,6 +10,7 @@
     <modules>
         <module>gift-scheduler</module>
         <module>gift-common</module>
+        <module>gift-code-analyze</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -94,6 +95,21 @@
                 <groupId>cn.bigmodel.openapi</groupId>
                 <artifactId>oapi-java-sdk</artifactId>
                 <version>1.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>8.11.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.12.7.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>javaparser-core</artifactId>
+                <version>3.25.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
