@@ -1,0 +1,34 @@
+name: Continuous Integration
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK and Scala
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+          scala-version: '2.12.0'
+
+      - name: Maven check the main module
+        run: |
+          if [ -e pom.xml ]; then
+            echo "Processing main module"
+            mvn -B clean verify
+          fi
+
+      - name: Maven checks the submodules
+        run: |
+          for dir in $(find . -name "pom.xml" -exec dirname {} \;); do
+            if [ "$dir" != "." ]; then
+              echo "Processing submodule: $dir"
+              (cd $dir && mvn -B clean verify)
+            fi
+          done
