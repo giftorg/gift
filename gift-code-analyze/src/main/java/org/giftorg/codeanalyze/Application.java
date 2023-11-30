@@ -1,33 +1,28 @@
 package org.giftorg.codeanalyze;
 
-import org.giftorg.codeanalyze.analyzer.CodeAnalyzer;
-import org.giftorg.codeanalyze.analyzer.impl.JavaCodeAnalyzer;
 import org.giftorg.codeanalyze.code.Function;
-import org.giftorg.common.bigmodel.BigModel;
-import org.giftorg.common.bigmodel.impl.ChatGLM;
 import org.giftorg.common.elasticsearch.Elasticsearch;
+import org.giftorg.common.tokenpool.TokenPool;
 
 import java.io.IOException;
 import java.util.List;
 
 public class Application {
     public static void main(String[] args) throws Exception {
-//        CodeAnalyzer analyzer = new JavaCodeAnalyzer();
-//        List<Function> funcList = analyzer.getFuncList(ClassLoader.getSystemResource("XingHuo.java").getPath());
-//        funcList.forEach(f -> {
-//            try {
-//                System.out.println(f);
-//                f.insertElasticsearch();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
+//        testAnalyze();
+        testEmbedding();
+    }
 
-        BigModel model = new ChatGLM();
+    public static void testAnalyze() throws IOException {
+        CodeAnalyzeApplication app = new CodeAnalyzeApplication();
+        app.run("/phodal/migration");
 
-        List<Double> embedding = model.textEmbedding("怎么做文本向量化");
+        Elasticsearch.close();
+        TokenPool.closeDefaultTokenPool();
+    }
 
-        List<Function> functions = Elasticsearch.retrieval("gift_function", "embedding", embedding, Function.class);
+    public static void testEmbedding() throws Exception {
+        List<Function> functions = Elasticsearch.retrieval("gift_function", "description", "怎么连接数据库", "embedding", Function.class);
         functions.forEach(System.out::println);
 
         Elasticsearch.close();

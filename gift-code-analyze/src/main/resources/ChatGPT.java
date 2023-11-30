@@ -31,7 +31,6 @@ import org.giftorg.common.tokenpool.APITaskResult;
 import org.giftorg.common.tokenpool.TokenPool;
 import org.giftorg.common.utils.StringUtil;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,7 +40,11 @@ public class ChatGPT implements BigModel {
     private static final List<String> apiKeys = Config.chatGPTConfig.getApiKeys();
     private static final String model = Config.chatGPTConfig.getModel();
     private static final String apiUrl = baseUrl + "/v1/chat/completions";
-    private static final TokenPool tokenPool = TokenPool.getTokenPool(apiKeys, 64, 3);
+    private final TokenPool tokenPool;
+
+    public ChatGPT() {
+        tokenPool = new TokenPool(apiKeys, 60, 3);
+    }
 
     /**
      * 聊天接口，接收一个消息列表，返回大模型回复的消息
@@ -80,6 +83,10 @@ public class ChatGPT implements BigModel {
         throw new Exception("not implemented");
     }
 
+    public void close() {
+        tokenPool.close();
+    }
+
     /**
      * ChatGPT 请求体
      */
@@ -104,12 +111,5 @@ public class ChatGPT implements BigModel {
     @ToString
     public static class Choice {
         public Message message;
-    }
-
-    public static void main(String[] args) throws Exception {
-        ChatGPT gpt = new ChatGPT();
-        for (int i = 0; i < 18; i++) {
-            gpt.chat(Arrays.asList(new Message("user", "hello")));
-        }
     }
 }

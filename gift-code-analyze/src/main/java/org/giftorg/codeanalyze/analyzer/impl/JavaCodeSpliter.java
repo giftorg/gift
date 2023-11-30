@@ -4,7 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import org.giftorg.codeanalyze.analyzer.CodeAnalyzer;
+import org.giftorg.codeanalyze.analyzer.CodeSpliter;
 import org.giftorg.codeanalyze.code.Function;
 import org.giftorg.codeanalyze.code.Position;
 import org.giftorg.common.bigmodel.BigModel;
@@ -12,17 +12,36 @@ import org.giftorg.common.bigmodel.impl.ChatGLM;
 import org.giftorg.common.bigmodel.impl.ChatGPT;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class JavaCodeAnalyzer implements CodeAnalyzer {
+public class JavaCodeSpliter implements CodeSpliter {
     private final static String LANGUAGE_JAVA = "java";
 
     @Override
-    public List<Function> getFuncList(String file) {
+    public List<Function> splitFunctions(String file) {
         try {
             CompilationUnit cu = StaticJavaParser.parse(new File(file));
+            return splitFunctions(cu);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Function> splitFunctions(InputStream in) {
+        try {
+            CompilationUnit cu = StaticJavaParser.parse(in);
+            return splitFunctions(cu);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Function> splitFunctions(CompilationUnit cu) {
+        try {
             List<Function> result = new ArrayList<>();
 
             cu.findAll(MethodDeclaration.class).forEach(method -> {
@@ -50,37 +69,7 @@ public class JavaCodeAnalyzer implements CodeAnalyzer {
                 func.setBegin(method.getBegin().isPresent() ? new Position(method.getBegin().get()) : null);
                 func.setEnd(method.getEnd().isPresent() ? new Position(method.getEnd().get()) : null);
                 func.setLanguage(LANGUAGE_JAVA);
-
-                // 获取函数的描述信息
-                BigModel gpt = new ChatGPT();
-                try {
-                    String description = gpt.chat(new ArrayList<BigModel.Message>() {{
-                        // 为用户输入的函数写一行不超过50字的中文注释，描述函数的作用。
-                        // Write a Chinese comment in one line, not exceeding 50 characters, for the user-inputted function, describing the function's purpose.
-                        add(new BigModel.Message("system", "Write a Chinese comment in one line, not exceeding 50 characters, for the user-inputted function, describing the function's purpose.\nInput example: \"public static void add(int a, int b) { return a + b; }\"\nOutput example: \"计算两位整数的和\""));
-                        add(new BigModel.Message("user", method.toString()));
-                    }});
-                    func.setDescription(description);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                // 将函数描述向量化
-                BigModel glm = new ChatGLM();
-                try {
-                    List<Double> embedding = glm.textEmbedding(func.getDescription());
-                    func.setEmbedding(embedding);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
                 result.add(func);
-
-                try {
-                    Thread.sleep(19000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
             });
 
             return result;

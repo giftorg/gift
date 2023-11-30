@@ -2,8 +2,10 @@ package org.giftorg.codeanalyze.code;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class Position {
+public class Position implements Serializable {
     public Integer line;
     public Integer column;
 

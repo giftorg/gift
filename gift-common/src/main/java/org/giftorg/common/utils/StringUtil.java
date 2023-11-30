@@ -29,4 +29,12 @@ public class StringUtil {
         }
         return str;
     }
+
+    @NotNull
+    public static String trimStart(String str, String prefix) {
+        if (str.startsWith(prefix)) {
+            return str.substring(prefix.length());
+        }
+        return str;
+    }
 }

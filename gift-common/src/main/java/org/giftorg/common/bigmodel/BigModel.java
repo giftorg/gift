@@ -3,9 +3,10 @@ package org.giftorg.common.bigmodel;
 import lombok.Data;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface BigModel {
+public interface BigModel extends Serializable {
 
     String chat(List<Message> messages) throws Exception;
 

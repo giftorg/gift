@@ -6,12 +6,12 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.giftorg.common.hdfs.HDFS;
+import org.giftorg.common.utils.GitUtil;
+import org.giftorg.common.utils.PathUtil;
+import org.giftorg.scheduler.dao.HDFSDao;
 import org.giftorg.scheduler.entity.Project;
 import org.giftorg.scheduler.mapper.ProjectMapper;
 import org.giftorg.scheduler.service.ProjectService;
-import org.giftorg.common.utils.GitUtil;
-import org.giftorg.common.utils.PathUtil;
 
 import java.io.InputStream;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ProjectServiceImpl implements ProjectService {
     public Boolean putToHDFS(String local, String hdfsUrl) {
         try {
-            HDFS.put(local, hdfsUrl);
+            HDFSDao.put(local, hdfsUrl);
         } catch (Exception e) {
             log.error("put repository {} to HDFS error: {}", local, e.getMessage());
             return false;
@@ -41,7 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
         log.info("git clone success. remote: {}, local: {}", remote, local);
 
         // 将项目上传到HDFS
-        String hdfsUrl = HDFS.hdfsRepoRelPath(remote.replace("https://github.com", ""));
+        String hdfsUrl = HDFSDao.hdfsRepoPath(remote.replace("https://github.com", ""));
         log.info("putting repository {} to HDFS {}", local, hdfsUrl);
         if (putToHDFS(local, hdfsUrl)) {
             log.info("put repository {} to HDFS success", local);

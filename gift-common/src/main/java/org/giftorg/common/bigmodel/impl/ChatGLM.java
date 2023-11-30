@@ -20,7 +20,7 @@ import java.util.UUID;
 @Slf4j
 public class ChatGLM implements BigModel {
     private static final String API_URL = "https://open.bigmodel.cn/api/paas/v3/model-api/text_embedding/invoke";
-    private static final String API_KEY = "";
+    private static final String API_KEY = "700b86ec78faa1ad8af5c4b01594e15d.UzSKKYtCkSPrn7CP";
 
     @Override
     public String chat(List<Message> messages) throws Exception {
@@ -136,7 +136,6 @@ public class ChatGLM implements BigModel {
 //        ));
         List<Double> embedding = glm.textEmbedding("我在这见过你");
         log.info(embedding.toString());
-        Elasticsearch.retrieval(index, "embedding", embedding, EsText.class);
     }
 
     // test

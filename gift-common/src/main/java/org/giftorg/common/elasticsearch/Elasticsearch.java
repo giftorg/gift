@@ -11,6 +11,8 @@ import jakarta.json.stream.JsonGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
+import org.giftorg.common.bigmodel.BigModel;
+import org.giftorg.common.bigmodel.impl.ChatGLM;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +23,6 @@ import java.util.Map;
 public class Elasticsearch {
     private static final String serverUrl = "http://elasticsearch:9200";
     private static final RestClient restClient;
-    private static final ElasticsearchClient esClient;
 
     public static final String IK_MAX_WORD_ANALYZER = "ik_max_word";
     public static final String IK_SMART_ANALYZER = "ik_smart";
@@ -30,14 +31,13 @@ public class Elasticsearch {
         restClient = RestClient
                 .builder(HttpHost.create(serverUrl))
                 .build();
-        ElasticsearchTransport transport = new RestClientTransport(
-                restClient,
-                new JacksonJsonpMapper());
-        esClient = new ElasticsearchClient(transport);
     }
 
     public static ElasticsearchClient EsClient() {
-        return esClient;
+        ElasticsearchTransport transport = new RestClientTransport(
+                restClient,
+                new JacksonJsonpMapper());
+        return new ElasticsearchClient(transport);
     }
 
     public static void close() throws IOException {
@@ -45,7 +45,7 @@ public class Elasticsearch {
     }
 
     public static <T> List<T> retrieval(String index, String field, List<Double> embedding, Class<T> type) throws IOException {
-        SearchResponse<T> resp = esClient.search(
+        SearchResponse<T> resp = EsClient().search(
                 search -> search.index(index).query(query -> query
                         .scriptScore(ss -> ss
                                 .script(s -> s.inline(l -> l
@@ -53,6 +53,31 @@ public class Elasticsearch {
                                         .params("query_vector", JsonData.of(embedding))
                                 ))
                                 .query(q -> q.matchAll(ma -> ma))
+                        )
+                ),
+                type
+        );
+
+        List<T> result = new ArrayList<>();
+        resp.hits().hits().forEach(hit -> {
+            result.add(hit.source());
+        });
+
+        return result;
+    }
+
+    public static <T> List<T> retrieval(String index, String textField, String text, String embeddingField, Class<T> type) throws Exception {
+        BigModel model = new ChatGLM();
+        List<Double> embedding = model.textEmbedding(text);
+
+        SearchResponse<T> resp = EsClient().search(
+                search -> search.index(index).query(query -> query
+                        .scriptScore(ss -> ss
+                                .script(s -> s.inline(l -> l
+                                        .source("cosineSimilarity(params.query_vector, '" + embeddingField + "') + 1.0")
+                                        .params("query_vector", JsonData.of(embedding))
+                                ))
+                                .query(q -> q.match(ma -> ma.field(textField).query(text)))
                         )
                 ),
                 type

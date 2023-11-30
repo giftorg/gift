@@ -21,6 +21,8 @@ package org.giftorg.common.config;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 配置的结构
  */
@@ -52,7 +54,7 @@ public class Properties {
     public static class ChatGPTProperties {
         private String baseUrl;
 
-        private String apiKey;
+        private List<String> apiKeys;
 
         private String model;
     }
