@@ -1,0 +1,14 @@
+hdfs:
+  addr: "hdfs://master:8020"
+  reposPath: "/gift/repositories"
+
+chatGPT:
+  baseUrl: "https//api.openai.com/"
+  apiKey:
+  model: "gpt-3.5-turbo"
+
+xingHou:
+  hostUrl: "https://spark-api.xf-yun.com/v2.1/chat"
+  appid:
+  apiSecret:
+  apiKey:
