@@ -51,7 +51,11 @@ def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
             stars=repo.get('watchers_count'),
             login_name=repo.get('owner').get('login'),
             repository=repo.get('html_url'),
-            description=repo.get('description')
+            description=repo.get('description'),
+            size = repo.get('size'),
+            id = repo.get('id'),
+            full_name = repo.get('full_name'),
+            default_branch = repo.get('default_branch')
         )
         print(project)
         projects.append(project)
