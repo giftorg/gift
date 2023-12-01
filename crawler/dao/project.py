@@ -39,7 +39,7 @@ class ProjectDao:
     def insert(self, project: Project):
         try:
             with self.connection.cursor() as cursor:
-                sql = "INSERT INTO `projects` (`item_name`, `stars`, `login_name`, `repository`, `description`) VALUES (%s, %s, %s, %s, %s)"
+                sql = "INSERT INTO `projects` (`item_name`, `stars`, `login_name`, `repository`, `description`,`size`,`id`,`full_name`,`default_branch`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 logging.info("execute: " + sql % project.to_list())
                 cursor.execute(sql, project.to_list())
                 self.connection.commit()
