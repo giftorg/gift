@@ -23,9 +23,9 @@ public class GitUtil {
     /**
      * git clone project to local
      */
-    public static Boolean gitClone(String remote, String local) {
+    public static void gitClone(String remote, String local) throws RuntimeException {
         remote = remote.replace("https://github.com/", "https://githubfast.com/");
         String cmd = "git clone " + remote + " " + local;
-        return CmdUtil.exec(cmd);
+        CmdUtil.exec(cmd);
     }
 }

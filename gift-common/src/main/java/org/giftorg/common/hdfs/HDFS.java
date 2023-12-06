@@ -1,4 +1,3 @@
-
 /**
  * copyright 2023 giftorg authors
  *
@@ -56,7 +55,6 @@ public class HDFS {
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(conf);
         fs.copyFromLocalFile(new Path(src), hdfsPath(dst));
-        fs.close();
     }
 
     /**
@@ -82,9 +80,8 @@ public class HDFS {
         FileSystem fs = FileSystem.get(conf);
 
         List<String> result = new ArrayList<>();
-        dfs(fs, new Path(hdfsRepoPath(path)), result);
+        dfs(fs, new Path(path), result);
 
-        fs.close();
         return result;
     }
 }

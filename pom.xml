@@ -10,15 +10,17 @@
     <modules>
         <module>gift-scheduler</module>
         <module>gift-common</module>
-        <module>gift-code-analyze</module>
+        <module>gift-analyze</module>
     </modules>
 
     <packaging>pom</packaging>
 
     <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <java.version>1.8</java.version>
         <scala.version>2.12.0</scala.version>
-        <scala.binary.version>2.12</scala.binary.version>
+        <scala.maven.plugin.version>3.3.3</scala.maven.plugin.version>
         <spark.version>3.2.1</spark.version>
         <hadoop.version>3.3.4</hadoop.version>
     </properties>
@@ -72,11 +74,6 @@
                 <version>3.5.14</version>
             </dependency>
             <dependency>
-                <groupId>org.giftorg</groupId>
-                <artifactId>gift-code-analyze</artifactId>
-                <version>1.0.0</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>13.0</version>
@@ -111,6 +108,17 @@
                 <artifactId>javaparser-core</artifactId>
                 <version>3.25.6</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>3.6.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.giftorg</groupId>
+                <artifactId>gift-common</artifactId>
+                <version>1.0.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
 </project>

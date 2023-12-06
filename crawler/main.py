@@ -15,18 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import csv
 import logging
-from queue import Queue
 import time
+from queue import Queue
+from typing import List
 
 import requests
-import csv
-
-from typing import List
 
 from dao.project import ProjectDao
 from entity.project import Project
 from languages.languages import Languages
+from mq.mq import *
+
+pd = ProjectDao('139.9.65.13', 23306, 'root', 'root', 'test')
+mq = CrawlerMQ('kafka:9092')
 
 
 def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
@@ -35,6 +38,7 @@ def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
     """
 
     url = f'https://api.github.com/search/repositories?q=language:{lang}&sort=stars&page={page}&per_page={count}'
+    logging.info(f"正在获取：{url} ...")
     resp = requests.get(url)
     if resp.status_code != 200:
         raise Exception(f'请求仓库列表失败，状态码：{resp.status_code}')
@@ -47,17 +51,17 @@ def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
     projects: List[Project] = list()
     for repo in repos:
         project = Project(
+            id=int(repo.get('id')),
             item_name=repo.get('name'),
-            stars=repo.get('watchers_count'),
+            stars=int(repo.get('watchers_count')),
             login_name=repo.get('owner').get('login'),
             repository=repo.get('html_url'),
             description=repo.get('description'),
-            size = repo.get('size'),
-            id = repo.get('id'),
-            full_name = repo.get('full_name'),
-            default_branch = repo.get('default_branch')
+            size=int(repo.get('size')),
+            full_name=repo.get('full_name'),
+            default_branch=repo.get('default_branch')
         )
-        print(project)
+        logging.info(f'project-{project}')
         projects.append(project)
     return projects
 
@@ -73,6 +77,22 @@ def save_to_csv(file_path, projects: List[Project]):
             writer.writerow(project.to_list())
 
 
+class Task:
+    max_retry_count = 5
+
+    def __init__(self, lang: Languages, page: int, retry_count: int):
+        self.lang = lang
+        self.page = page
+        self.retry_count = retry_count
+
+    def getTask(self) -> (Languages, int, bool):
+        self.retry_count += 1
+        return self.lang, self.page, self.retry_count < self.max_retry_count
+
+    def __str__(self):
+        return '{' + f'lang: {lang}, page: {page}' + '}'
+
+
 # 初始化任务队列
 def init_task_queue() -> Queue:
     # 任务队列
@@ -80,32 +100,40 @@ def init_task_queue() -> Queue:
     # 每种语言最大的页数 10个页面 每页100个仓库
     lang_max_page = 10
 
-    for language in Languages:
+    for lang in Languages:
         for p in range(1, lang_max_page + 1):
-            task_queue.put((language.value, p))
+            task_queue.put(Task(lang.value, p, 0))
 
     return task_queue
 
 
-if __name__ == '__main__':
-    pd = ProjectDao('localhost', 3306, 'root', 'root', 'test')
-    # pd = ProjectDao('139.9.65.13', 23306, 'root', 'root', 'test')
+# 持久化项目列表
+def save_project_list(projects):
+    try:
+        for p in projects:
+            pd.insert(p)
+            mq.publish(CRAWLER_TOPIC, CrawlerTask(p.id, DEFAULT_RETRY_COUNT))
+            time.sleep(0.2)
+    except Exception as e:
+        raise Exception(f"持久化项目列表失败：{e}")
 
+
+if __name__ == '__main__':
     task_queue = init_task_queue()
-    project_list: List[Project] = list()
 
     # 遍历任务队列
     while not task_queue.empty():
         task = task_queue.get()
         try:
-            projects = getGithubRepoList(task[0], task[1], 100)
-            pd.inserts(projects)
-            project_list.extend(projects)
+            lang, page, ok = task.getTask()
+            if not ok:
+                logging.error(f'task-{task}：超出最大重试次数')
+            projects = getGithubRepoList(lang, page, 100)
+            save_project_list(projects)
         except Exception as e:
             # 执行失败，放到队列重试
             task_queue.put(task)
-            logging.info(e)
+            logging.error(e)
         time.sleep(1)
 
     pd.close()
-    logging.info(f"项目总数为：{len(project_list)}")

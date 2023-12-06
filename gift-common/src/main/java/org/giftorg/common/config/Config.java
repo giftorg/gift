@@ -20,14 +20,14 @@
 package org.giftorg.common.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.SparkFiles;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
+import java.net.URI;
+import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 读取与存储项目配置
@@ -37,15 +37,53 @@ public class Config {
     public static Properties.HDFSProperties hdfsConfig;
     public static Properties.XingHouProperties xingHouConfig;
     public static Properties.ChatGPTProperties chatGPTConfig;
+    private static final String DEFAULT_CONFIG_PATH = "config.yaml";
 
     static {
-        Yaml yaml = new Yaml();
-        Properties config;
-        URL url = ClassLoader.getSystemResource("config.yaml");
+        log.info("Initializing configuration ...");
 
-        try (InputStream in = Files.newInputStream(Paths.get(url.toURI()))) {
-            config = yaml.loadAs(in, Properties.class);
-        } catch (IOException | URISyntaxException e) {
+        String configPath = DEFAULT_CONFIG_PATH;
+        boolean isSpark = true;
+        try {
+            configPath = SparkFiles.get(DEFAULT_CONFIG_PATH);
+        } catch (Exception e) {
+            isSpark = false;
+        }
+
+        InputStream in;
+        if (isSpark && new File(configPath).exists()) {
+            log.info("config path: {}", configPath);
+            try {
+                in = Files.newInputStream(Paths.get(configPath));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            configPath = DEFAULT_CONFIG_PATH;
+
+            try {
+                URI uri = ClassLoader.getSystemResource(configPath).toURI();
+                log.info("config path: {}", uri.getPath());
+                in = Files.newInputStream(Paths.get(uri));
+            } catch (Exception ignore) {
+                try {
+                    URI uri = ClassLoader.getSystemResource(configPath).toURI();
+                    log.info("config path: {}", uri.getPath());
+                    Map<String, String> env = new HashMap<>();
+                    env.put("create", "true");
+                    FileSystems.newFileSystem(uri, env);
+                    in = Files.newInputStream(Paths.get(uri));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        Properties config;
+        try {
+            config = new Yaml().loadAs(in, Properties.class);
+            in.close();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

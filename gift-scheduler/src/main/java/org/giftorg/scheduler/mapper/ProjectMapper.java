@@ -25,8 +25,9 @@ import org.giftorg.scheduler.entity.Project;
 import java.util.List;
 
 public interface ProjectMapper {
-
     Project selectOne(@Param("id") Integer id);
+
+    Project selectOneByRepoId(@Param("repoId") Integer repoId);
 
     List<Project> selectList();
 

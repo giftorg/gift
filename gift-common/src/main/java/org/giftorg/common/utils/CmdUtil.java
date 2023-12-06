@@ -29,10 +29,8 @@ import java.io.InputStreamReader;
 public class CmdUtil {
     /**
      * 执行 cmd 命令
-     *
-     * @return true: 执行成功; false: 执行失败
      */
-    public static Boolean exec(String name, String... arg) {
+    public static void exec(String name, String... arg) throws RuntimeException {
         String cmd = name + " " + String.join(" ", arg);
         try {
             Process process = Runtime.getRuntime().exec(cmd);
@@ -52,10 +50,12 @@ public class CmdUtil {
             stdoutReader.close();
             stderrReader.close();
 
-            return process.waitFor() == 0;
+            if (process.waitFor() != 0) {
+                throw new RuntimeException("exec cmd error: " + cmd);
+            }
         } catch (Exception e) {
             log.error("exec cmd error: {}", cmd, e);
-            return false;
+            throw new RuntimeException("exec cmd error: " + cmd);
         }
     }
 }

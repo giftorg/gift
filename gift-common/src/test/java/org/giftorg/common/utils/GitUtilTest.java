@@ -34,11 +34,10 @@ class GitUtilTest {
         String remote = "https://github.com/giftorg/gift";
         String local = FileUtil.getAbsolutePath(PathUtil.join("git_test", PathUtil.base(remote)));
 
-        Boolean ok = GitUtil.gitClone(remote, local);
-        assertEquals(true, ok);
+        GitUtil.gitClone(remote, local);
         assertTrue(FileUtil.exist(local));
 
-        ok = FileUtil.del(local);
-        assertEquals(true, ok);
+        boolean ok = FileUtil.del(local);
+        assertTrue(ok);
     }
 }
