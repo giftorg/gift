@@ -51,6 +51,8 @@ public class Function implements Serializable {
 
     private Integer repoId;
 
+    private String filePath;
+
     public void setRepoId(Integer repoId) {
         this.repoId = repoId;
     }
@@ -59,7 +61,6 @@ public class Function implements Serializable {
         this.filePath = filePath;
     }
 
-    private String filePath;
 
     /**
      * 函数分析与向量化
