@@ -20,8 +20,10 @@
 package org.giftorg.analyze.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.giftorg.common.kafka.RetryTask;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class AnalyzeTask extends RetryTask {
     private Repository project;

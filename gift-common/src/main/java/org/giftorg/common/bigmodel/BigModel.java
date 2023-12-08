@@ -27,8 +27,14 @@ import java.util.List;
 
 public interface BigModel extends Serializable {
 
+    /**
+     * 大模型聊天接口
+     */
     String chat(List<Message> messages) throws Exception;
 
+    /**
+     * 计算文本嵌入向量
+     */
     List<Double> textEmbedding(String prompt) throws Exception;
 
     /**

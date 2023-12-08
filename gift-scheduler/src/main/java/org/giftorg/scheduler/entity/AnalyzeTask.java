@@ -23,6 +23,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.giftorg.common.kafka.RetryTask;
 
+/**
+ * 传入 Kafka 的分析任务实体类
+ * 继承自 RetryTask，用于重试
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AnalyzeTask extends RetryTask {

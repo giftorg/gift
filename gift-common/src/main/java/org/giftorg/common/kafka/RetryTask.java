@@ -22,6 +22,9 @@ package org.giftorg.common.kafka;
 import cn.hutool.json.JSONUtil;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+/**
+ * Kafka 重试任务抽象类
+ */
 public abstract class RetryTask {
 
     public static Integer DEFAULT_RETRY_COUNT = 0;
@@ -33,6 +36,9 @@ public abstract class RetryTask {
 
     public abstract String topic();
 
+    /**
+     * 任务重试操作，通过 isRetry() 判断是否需要重试
+     */
     public void retry(KafkaProducerClient producer) {
         if (isRetry()) {
             ProducerRecord<String, String> msg = new ProducerRecord<>(topic(), JSONUtil.toJsonStr(this));

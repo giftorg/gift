@@ -22,6 +22,9 @@ package org.giftorg.common.utils;
 import org.jetbrains.annotations.NotNull;
 
 public class StringUtil {
+    /**
+     * 修剪字符串结尾的指定后缀
+     */
     @NotNull
     public static String trimEnd(String str, String suffix) {
         if (str.endsWith(suffix)) {
@@ -30,6 +33,9 @@ public class StringUtil {
         return str;
     }
 
+    /**
+     * 修剪字符串开头的指定前缀
+     */
     @NotNull
     public static String trimStart(String str, String prefix) {
         if (str.startsWith(prefix)) {

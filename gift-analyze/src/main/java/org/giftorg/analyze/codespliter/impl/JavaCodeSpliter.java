@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Java 代码拆分器
+ */
 public class JavaCodeSpliter implements CodeSpliter {
     private final static String LANGUAGE_JAVA = "java";
 
@@ -56,11 +59,29 @@ public class JavaCodeSpliter implements CodeSpliter {
         }
     }
 
+    /**
+     * 按 class 拆分代码
+     */
     private List<Function> splitFunctions(CompilationUnit cu) {
         try {
             List<Function> result = new ArrayList<>();
 
-            cu.findAll(MethodDeclaration.class).forEach(method -> {
+            List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
+
+            for (ClassOrInterfaceDeclaration cls : classes) {
+                if (cls.isInterface()) continue;
+
+                Function func = new Function();
+                func.setName(cls.getNameAsString());
+                func.setSource(cls.toString());
+                func.setBegin(cls.getBegin().isPresent() ? new Position(cls.getBegin().get()) : null);
+                func.setEnd(cls.getEnd().isPresent() ? new Position(cls.getEnd().get()) : null);
+                func.setLanguage(LANGUAGE_JAVA);
+                result.add(func);
+            }
+
+            /* 按函数拆分版本（已弃用）
+              cu.findAll(MethodDeclaration.class).forEach(method -> {
                 AtomicBoolean isImpl = new AtomicBoolean(false);
 
                 // 判断是否为未实现的接口方法
@@ -86,7 +107,8 @@ public class JavaCodeSpliter implements CodeSpliter {
                 func.setEnd(method.getEnd().isPresent() ? new Position(method.getEnd().get()) : null);
                 func.setLanguage(LANGUAGE_JAVA);
                 result.add(func);
-            });
+              });
+             */
 
             return result;
 

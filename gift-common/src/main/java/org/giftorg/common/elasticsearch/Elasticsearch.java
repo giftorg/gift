@@ -30,16 +30,23 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.giftorg.common.bigmodel.BigModel;
 import org.giftorg.common.bigmodel.impl.ChatGLM;
+import org.giftorg.common.config.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Elasticsearch 操作类
+ */
 @Slf4j
 public class Elasticsearch {
-    private static final String serverUrl = "http://elasticsearch:9200";
+    private static final String serverUrl = Config.elasticsearchConfig.getHostUrl();
     private static final RestClient restClient;
 
+    // 分词器
+    // ik_max_word: 细粒度分词器
+    // ik_smart: 粗粒度分词器
     public static final String IK_MAX_WORD_ANALYZER = "ik_max_word";
     public static final String IK_SMART_ANALYZER = "ik_smart";
 
@@ -49,6 +56,9 @@ public class Elasticsearch {
                 .build();
     }
 
+    /**
+     * 获取 Elasticsearch 客户端单例
+     */
     public static ElasticsearchClient EsClient() {
         ElasticsearchTransport transport = new RestClientTransport(
                 restClient,
@@ -56,6 +66,9 @@ public class Elasticsearch {
         return new ElasticsearchClient(transport);
     }
 
+    /**
+     * 关闭 Elasticsearch 客户端
+     */
     public static void close() {
         try {
             restClient.close();
@@ -64,6 +77,14 @@ public class Elasticsearch {
         }
     }
 
+    /**
+     * 使用向量检索所有文档
+     * @param index es 索引
+     * @param field es 索引中的向量字段
+     * @param embedding 待检索的向量
+     * @param type 返回的文档类型
+     * @return 检索结果，包含所有文档，按相似度降序排列
+     */
     public static <T> List<T> retrieval(String index, String field, List<Double> embedding, Class<T> type) throws IOException {
         SearchResponse<T> resp = EsClient().search(
                 search -> search.index(index).query(query -> query
@@ -86,6 +107,15 @@ public class Elasticsearch {
         return result;
     }
 
+    /**
+     * 使用指定值过滤，并向量化检索文档
+     * @param index es 索引
+     * @param textField es 索引中的文本字段
+     * @param text 待检索的文本
+     * @param embeddingField es 索引中的向量字段
+     * @param type 返回的文档类型
+     * @return 检索结果，仅包含过滤后的文档，按相似度降序排列
+     */
     public static <T> List<T> retrieval(String index, String textField, String text, String embeddingField, Class<T> type) throws Exception {
         BigModel model = new ChatGLM();
         List<Double> embedding = model.textEmbedding(text);

@@ -28,6 +28,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
 
+/**
+ * API Token 池
+ * 自动维护可用的 token 列表，提供给外部使用
+ * 该池会在需要时提供一个全局的 token pool, 如果没有多个 token pool 的特殊要求，建议使用全局的 token pool
+ * 多个 token pool 之间建议传入不同的 token list
+ */
 @Slf4j
 @Getter
 public class TokenPool extends Thread {
@@ -98,6 +104,9 @@ public class TokenPool extends Thread {
         this.start();
     }
 
+    /**
+     * 获取全局的 TokenPool
+     */
     public static TokenPool getTokenPool(List<String> tokens, Integer cycle, Integer frequency) {
         if (tokenPool == null) {
             tokenPool = new TokenPool(tokens, cycle, frequency);
@@ -105,6 +114,9 @@ public class TokenPool extends Thread {
         return tokenPool;
     }
 
+    /**
+     * 获取全局的 TokenPool，并指定 api token 任务执行的最大线程数
+     */
     public static TokenPool getTokenPool(List<String> tokens, Integer cycle, Integer frequency, Integer maxThread) {
         if (tokenPool == null) {
             tokenPool = new TokenPool(tokens, cycle, frequency, maxThread);
@@ -112,10 +124,16 @@ public class TokenPool extends Thread {
         return tokenPool;
     }
 
+    /**
+     * 添加 api token 任务，异步执行
+     */
     public void addTask(APITask apiTask) {
         apiTaskQueue.add(apiTask);
     }
 
+    /**
+     * 添加 api token 任务，同步执行并返回执行结态
+     */
     public APITaskResult runTask(APITask apiTask) {
         APITasker apiTasker = new APITasker(apiTask);
         apiTaskQueue.add(apiTasker);
@@ -126,6 +144,9 @@ public class TokenPool extends Thread {
         }
     }
 
+    /**
+     * Token 池的调度程序
+     */
     public void run() {
         tokenTimer = new Timer();
         executorService = Executors.newFixedThreadPool(maxThread);
@@ -177,6 +198,9 @@ public class TokenPool extends Thread {
         return t;
     }
 
+    /**
+     * 关闭 TokenPool
+     */
     public void close() {
         active = false;
         tokenTimer.cancel();
@@ -184,6 +208,9 @@ public class TokenPool extends Thread {
         super.interrupt();
     }
 
+    /**
+     * 关闭全局的 TokenPool
+     */
     public static void closeDefaultTokenPool() {
         if (tokenPool != null) {
             tokenPool.close();

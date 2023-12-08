@@ -21,7 +21,7 @@ package org.giftorg.common.utils;
 
 public class GitUtil {
     /**
-     * git clone project to local
+     * 克隆 git 项目到指定路径
      */
     public static void gitClone(String remote, String local) throws RuntimeException {
         remote = remote.replace("https://github.com/", "https://githubfast.com/");

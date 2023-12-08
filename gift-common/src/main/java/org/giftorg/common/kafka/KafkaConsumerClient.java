@@ -22,6 +22,7 @@ package org.giftorg.common.kafka;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.giftorg.common.config.Config;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class KafkaConsumerClient {
 
     public KafkaConsumerClient(String topic, String groupId) {
         Properties props = new Properties();
-        props.setProperty("bootstrap.servers", "kafka:9092");
+        props.setProperty("bootstrap.servers", Config.kafkaConfig.getHostUrl());
         props.setProperty("group.id", groupId);
         props.setProperty("enable.auto.commit", "false");
         props.setProperty("auto.commit.interval.ms", "1000");
@@ -45,21 +46,29 @@ public class KafkaConsumerClient {
         kafkaConsumer.subscribe(Arrays.asList(topic));
     }
 
+    /**
+     * 拉取消息
+     */
     public ConsumerRecords<String, String> poll(int timeout) {
         return kafkaConsumer.poll(Duration.ofMillis(timeout));
     }
 
+    /**
+     * 异步提交offset
+     */
     public void commitAsync() {
         kafkaConsumer.commitAsync();
     }
 
+    /**
+     * 同步提交offset
+     */
     public void commitSync() {
         kafkaConsumer.commitSync();
     }
 
     public static void main(String[] args) {
-        KafkaConsumerClient consumer = new KafkaConsumerClient("my-topic", "test");
-
+        KafkaConsumerClient consumer = new KafkaConsumerClient("test-topic", "test");
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(1000);
             for (ConsumerRecord<String, String> record : records)

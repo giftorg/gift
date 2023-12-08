@@ -23,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+/**
+ * Kafka 发送消息自动重试回调类
+ */
 @Slf4j
 public class RetryCallback implements Callback {
     private final KafkaProducerClient producer;
@@ -33,6 +36,9 @@ public class RetryCallback implements Callback {
         this.task = task;
     }
 
+    /**
+     * 发送消息失败后的回调函数，自动进行重试
+     */
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {
         if (exception != null) {

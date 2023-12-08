@@ -22,6 +22,10 @@ package org.giftorg.common.tokenpool;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * 获取 api token 执行的任务
+ * APITasker 是对 APITask 的进一步封装，用于捕获任务执行结果
+ */
 public class APITasker implements APITask {
     private final APITask task;
     private final BlockingQueue<APITaskResult> resultQueue;
@@ -40,6 +44,9 @@ public class APITasker implements APITask {
         }
     }
 
+    /**
+     * 阻塞获取任务执行结果
+     */
     public APITaskResult getResult() throws InterruptedException {
         return resultQueue.take();
     }

@@ -23,10 +23,16 @@ import java.net.URI;
 import java.nio.file.*;
 
 public class PathUtil {
+    /**
+     * 拼接路径，多平台兼容
+     */
     public static String join(String first, String... more) {
         return Paths.get(first, more).toString();
     }
 
+    /**
+     * 获取路径最后的文件名
+     */
     public static String base(String path) {
         return Paths.get(URI.create(path).getPath()).getFileName().toString();
     }

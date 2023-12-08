@@ -38,21 +38,24 @@ import java.io.InputStream;
 @Slf4j
 public class ProjectServiceImpl implements ProjectService {
     private static final SqlSessionFactory sqlSessionFactory;
+    private static final String MYBATIS_CONFIG = "mybatis-config.xml";
+    private static final String LOCAL_REPO_TEMP_PATH = "temp_repositories";
 
     static {
-        String resource = "mybatis-config.xml";
         try {
-            InputStream inputStream = Resources.getResourceAsStream(resource);
+            InputStream inputStream = Resources.getResourceAsStream(MYBATIS_CONFIG);
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-
+    /**
+     * 拉取 Git项目到 HDFS
+     */
     public void pullProject(Project project) throws Exception {
         // clone project
-        String local = FileUtil.getAbsolutePath(PathUtil.join("repositories", project.getFullName()));
+        String local = FileUtil.getAbsolutePath(PathUtil.join(LOCAL_REPO_TEMP_PATH, project.getFullName()));
         GitUtil.gitClone(project.getUrl(), local);
         log.info("clone project {} success", project.getFullName());
 
@@ -66,6 +69,9 @@ public class ProjectServiceImpl implements ProjectService {
         log.info("delete local project {} success", project.getFullName());
     }
 
+    /**
+     * 根据仓库ID获取项目信息
+     */
     public Project getProjectByRepoId(Integer repoId) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             ProjectMapper pm = sqlSession.getMapper(ProjectMapper.class);
@@ -73,14 +79,6 @@ public class ProjectServiceImpl implements ProjectService {
         } catch (Exception e) {
             log.error("get project by repoId {} failed: {}", repoId, e.getMessage());
             throw new RuntimeException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            ProjectMapper pm = sqlSession.getMapper(ProjectMapper.class);
-            Project project = pm.selectOne(20);
-            System.out.println(project);
         }
     }
 }

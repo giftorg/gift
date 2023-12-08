@@ -24,7 +24,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocketListener;
+import okhttp3.WebSocket;
+import okhttp3.HttpUrl;
 import org.giftorg.common.bigmodel.BigModel;
 import org.giftorg.common.config.Config;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +41,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class XingHuo extends WebSocketListener implements BigModel {
@@ -49,11 +56,14 @@ public class XingHuo extends WebSocketListener implements BigModel {
 
     public List<Message> messages;
     public String answer = "";
-    private final CountDownLatch latch;
+    private BlockingDeque<Boolean> doneChannel;
+
+    public XingHuo() {
+    }
 
     public XingHuo(List<Message> messages) {
         this.messages = messages;
-        this.latch = new CountDownLatch(1);
+        this.doneChannel = new LinkedBlockingDeque<>();
     }
 
     /**
@@ -67,9 +77,10 @@ public class XingHuo extends WebSocketListener implements BigModel {
 
         XingHuo bigModel = new XingHuo(messages);
         client.newWebSocket(request, bigModel);
-        bigModel.latch.await();
-        client.dispatcher().executorService().shutdown();
-
+        Boolean done = bigModel.doneChannel.poll(100 * 1000L, TimeUnit.MILLISECONDS);
+        if (!Boolean.TRUE.equals(done)) {
+            throw new Exception("xing-hou chat timeout");
+        }
         log.info("chat answer: {}", bigModel.answer);
         return bigModel.answer;
     }
@@ -82,8 +93,7 @@ public class XingHuo extends WebSocketListener implements BigModel {
     @Override
     public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
         super.onOpen(webSocket, response);
-        ChatThread chatThread = new ChatThread(webSocket, newRequestBody(messages));
-        chatThread.start();
+        webSocket.send(newRequestBody(messages).toString());
     }
 
     @Override
@@ -107,6 +117,7 @@ public class XingHuo extends WebSocketListener implements BigModel {
 
     @Override
     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
+        doneChannel.add(true);
         super.onFailure(webSocket, t, response);
         try {
             if (null != response) {
@@ -123,7 +134,7 @@ public class XingHuo extends WebSocketListener implements BigModel {
 
     @Override
     public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
-        latch.countDown();
+        doneChannel.add(true);
         super.onClosed(webSocket, code, reason);
     }
 
@@ -214,26 +225,10 @@ public class XingHuo extends WebSocketListener implements BigModel {
     static class Choices {
         List<Message> text;
     }
-}
 
-/**
- * 聊天线程
- */
-@Slf4j
-class ChatThread extends Thread {
-    private final WebSocket webSocket;
-    private final JSONObject body;
-
-    public ChatThread(WebSocket webSocket, JSONObject body) {
-        this.webSocket = webSocket;
-        this.body = body;
-    }
-
-    public void run() {
-        try {
-            webSocket.send(body.toString());
-        } catch (Exception e) {
-            log.error("ChatThread error: {}", e.toString());
-        }
+    public static void main(String[] args) throws Exception {
+        XingHuo xh = new XingHuo();
+        String chat = xh.chat(Arrays.asList(new Message("user", "hello")));
+        System.out.println(chat);
     }
 }

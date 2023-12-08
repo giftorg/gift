@@ -22,7 +22,13 @@ package org.giftorg.scheduler.service;
 import org.giftorg.scheduler.entity.Project;
 
 public interface ProjectService {
+    /**
+     * 拉取 Git项目到 HDFS
+     */
     void pullProject(Project project) throws Exception;
 
+    /**
+     * 根据仓库ID获取项目信息
+     */
     Project getProjectByRepoId(Integer repoId);
 }

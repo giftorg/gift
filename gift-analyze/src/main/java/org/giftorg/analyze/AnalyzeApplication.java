@@ -35,7 +35,7 @@ import org.giftorg.common.tokenpool.TokenPool;
 public class AnalyzeApplication {
 
     public static void main(String[] args) {
-        SparkConf conf = new SparkConf().setAppName("GiftAnalyzer");
+        SparkConf conf = new SparkConf().setAppName("GiftAnalyzer").setMaster("local[*]");
         SparkContext sc = new SparkContext(conf);
 
         KafkaConsumerClient consumer = new KafkaConsumerClient(AnalyzeTask.TOPIC, "gift");
@@ -62,7 +62,7 @@ public class AnalyzeApplication {
                 } catch (Exception e) {
                     // 任务处理失败，重试
                     analyzeTask.retry(producer);
-                    log.error("analyze repository error: {}", e.getMessage());
+                    log.error("analyze repository error: {}", e.getMessage(), e);
                 }
             });
         }

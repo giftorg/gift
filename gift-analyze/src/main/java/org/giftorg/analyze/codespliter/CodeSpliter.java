@@ -27,7 +27,13 @@ import java.util.List;
 
 public interface CodeSpliter extends Serializable {
 
-    List<Function> splitFunctions(String code);
+    /**
+     * 拆分指定文件中的代码
+     */
+    List<Function> splitFunctions(String file);
 
+    /**
+     * 拆分输入文件流中的代码
+     */
     List<Function> splitFunctions(InputStream in);
 }

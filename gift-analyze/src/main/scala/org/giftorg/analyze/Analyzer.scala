@@ -20,7 +20,6 @@
 package org.giftorg.analyze
 
 import org.apache.spark.SparkContext
-import org.giftorg.analyze.codespliter.CodeSpliter
 import org.giftorg.analyze.codespliter.impl.JavaCodeSpliter
 import org.giftorg.analyze.dao.{FunctionESDao, RepositoryESDao}
 import org.giftorg.analyze.entity.Repository
@@ -30,9 +29,9 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import scala.collection.JavaConverters._
 
-class Analyzer(val sc: SparkContext) {
-  private val fd: FunctionESDao = new FunctionESDao();
-  private val rd: RepositoryESDao = new RepositoryESDao();
+class Analyzer(val sc: SparkContext) extends Serializable {
+  private val fd = new FunctionESDao()
+  private val rd = new RepositoryESDao()
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -40,43 +39,36 @@ class Analyzer(val sc: SparkContext) {
    * 分析程序启动入口
    */
   def run(repository: Repository): Unit = {
-    analyzeRepository(sc, repository)
+    analyzeRepository(repository)
   }
 
   /**
    * 项目仓库分析
    */
-  private def analyzeRepository(sc: SparkContext, repository: Repository): Unit = {
+  private def analyzeRepository(repository: Repository): Unit = {
     // 获取仓库中所有文件
     val files = HDFS.getRepoFiles(repository.hdfsPath).asScala.toArray
-    var repos: List[Repository] = List.empty
+    var docs = List.empty[(String, String)]
 
     files.foreach(file => {
       if (file.endsWith("README.md")) {
         // 如果文件为README文档，则进行文档分析
-        sc.wholeTextFiles(file).collect().foreach(file => {
-          val repo = repository.clone()
-          repo.readme = file._2
-          repos = repos :+ repo
-        })
+        handleDoc(repository, file)
       } else {
         // 其它文件进行代码分析
-        analyzeCode(sc, repository.id, file)
+         analyzeCode(repository.id, file)
       }
     })
-
-    // 仓库文档处理
-    handleDocs(sc, repos)
   }
 
   /**
    * 代码文件分析
    */
-  private def analyzeCode(sc: SparkContext, repoId: Integer, file: String): Unit = {
+  private def analyzeCode(repoId: Integer, file: String): Unit = {
     if (file.endsWith(".java")) {
       val fileRDD = sc.wholeTextFiles(file)
       fileRDD.flatMap(file => {
-        val analyzer: CodeSpliter = new JavaCodeSpliter()
+        val analyzer = new JavaCodeSpliter()
         val functions = analyzer.splitFunctions(new ByteArrayInputStream(file._2.getBytes()))
         functions.asScala.toList
       }).map(function => {
@@ -98,24 +90,22 @@ class Analyzer(val sc: SparkContext) {
   /**
    * 仓库文档处理
    */
-  private def handleDocs(sc: SparkContext, repos: List[Repository]): Unit = {
-    val repoRDD = sc.parallelize(repos)
-
-    repoRDD.map(repo => {
-      try {
-        repo.translation()
-        repo.tagging()
-        repo
-      } catch {
-        case _: Exception => null
-      }
+  private def handleDoc(repository: Repository, doc: String): Unit = {
+    sc.wholeTextFiles(doc).map(doc => {
+      val repo = repository.clone()
+      repo.readme = doc._2
+      repo.translation()
+      repo.tagging()
+      repo
     }).collect().foreach(repo => {
       if (repo == null) return
       try {
         rd.insert(repo)
         log.info("analyze repository success: {}", repo)
       } catch {
-        case e: Exception => println("analyze repository failed: " + e.getMessage)
+        case e:
+          Exception => println("analyze repository failed: " + e.getMessage)
+          e.printStackTrace()
       }
     })
   }

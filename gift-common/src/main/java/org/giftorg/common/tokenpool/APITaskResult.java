@@ -22,6 +22,10 @@ package org.giftorg.common.tokenpool;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * api task 的执行结果
+ * 记录任务是否执行成功，以及执行过程中的异常信息
+ */
 @ToString
 @Getter
 public class APITaskResult {

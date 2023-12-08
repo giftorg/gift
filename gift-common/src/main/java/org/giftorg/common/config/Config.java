@@ -30,15 +30,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 读取与存储项目配置
+ * 初始化并存储项目配置
  */
 @Slf4j
 public class Config {
+    private static final String DEFAULT_CONFIG_PATH = "config.yaml";
+
     public static Properties.HDFSProperties hdfsConfig;
     public static Properties.XingHouProperties xingHouConfig;
     public static Properties.ChatGPTProperties chatGPTConfig;
-    private static final String DEFAULT_CONFIG_PATH = "config.yaml";
+    public static Properties.ChatGLMProperties chatGLMConfig;
+    public static Properties.KafkaProperties kafkaConfig;
+    public static Properties.ElasticsearchProperties elasticsearchConfig;
 
+    // 初始化项目配置
     static {
         log.info("Initializing configuration ...");
 
@@ -52,9 +57,9 @@ public class Config {
 
         InputStream in;
         if (isSpark && new File(configPath).exists()) {
-            log.info("config path: {}", configPath);
             try {
                 in = Files.newInputStream(Paths.get(configPath));
+                log.info("config path: {}", configPath);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -63,16 +68,16 @@ public class Config {
 
             try {
                 URI uri = ClassLoader.getSystemResource(configPath).toURI();
-                log.info("config path: {}", uri.getPath());
                 in = Files.newInputStream(Paths.get(uri));
+                log.info("config path: {}", uri.getPath());
             } catch (Exception ignore) {
                 try {
                     URI uri = ClassLoader.getSystemResource(configPath).toURI();
-                    log.info("config path: {}", uri.getPath());
                     Map<String, String> env = new HashMap<>();
                     env.put("create", "true");
                     FileSystems.newFileSystem(uri, env);
                     in = Files.newInputStream(Paths.get(uri));
+                    log.info("config path: {}", uri.getPath());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -90,5 +95,8 @@ public class Config {
         hdfsConfig = config.hdfs;
         xingHouConfig = config.xingHou;
         chatGPTConfig = config.chatGPT;
+        chatGLMConfig = config.chatGLM;
+        kafkaConfig = config.kafka;
+        elasticsearchConfig = config.elasticsearch;
     }
 }

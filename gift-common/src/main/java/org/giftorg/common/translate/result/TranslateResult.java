@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2023 GiftOrg Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -6,7 +6,7 @@
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * the License.  You maggy obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -17,25 +17,15 @@
  * limitations under the License.
  */
 
-package org.giftorg.common.utils;
+package org.giftorg.common.translate.result;
 
-import org.junit.jupiter.api.Test;
+import lombok.Data;
 
-import java.io.File;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-public class JavaUtilTest {
-
-    @Test
-    void testGetMethods() {
-        List<String> methods;
-
-        methods = JavaUtil.getMethods(ClassLoader.getSystemResource("ClassA.java").getPath());
-        assertEquals(9, methods.size());
-
-        methods = JavaUtil.getMethods(ClassLoader.getSystemResource("InterfaceA.java").getPath());
-        assertEquals(3, methods.size());
-    }
+@Data
+public class TranslateResult {
+    private String requestId;
+    private List<String> translation;
+    private String errorCode;
 }

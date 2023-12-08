@@ -20,6 +20,7 @@
 package org.giftorg.common.kafka;
 
 import org.apache.kafka.clients.producer.*;
+import org.giftorg.common.config.Config;
 
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -30,29 +31,34 @@ public class KafkaProducerClient {
 
     public KafkaProducerClient() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "kafka:9092");
+        props.put("bootstrap.servers", Config.kafkaConfig.getHostUrl());
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         props.put("batch.size", 10);
-        props.put("linger.ms", 100);
+        props.put("linger.ms", 1000);
 
         kafkaProducer = new KafkaProducer<>(props);
     }
 
+    /**
+     * 发送消息
+     */
     public Future<RecordMetadata> send(ProducerRecord<String, String> producerRecord) {
         return kafkaProducer.send(producerRecord);
     }
 
+    /**
+     * 发送消息并指定回调函数
+     */
     public Future<RecordMetadata> send(ProducerRecord<String, String> producerRecord, Callback callback) {
         return kafkaProducer.send(producerRecord, callback);
     }
 
     public static void main(String[] args) {
         KafkaProducerClient producer = new KafkaProducerClient();
-
         for (int i = 0; i < 20; i++) {
-            Future<RecordMetadata> result = producer.send(new ProducerRecord<>("my-topic", Integer.toString(i), Integer.toString(i)));
+            Future<RecordMetadata> result = producer.send(new ProducerRecord<>("test-topic", Integer.toString(i), Integer.toString(i)));
             try {
                 RecordMetadata metadata = result.get();
                 System.out.println(metadata);

@@ -23,6 +23,10 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 代码位置
+ * 包括行号与列号
+ */
 @Data
 public class Position implements Serializable {
     public Integer line;

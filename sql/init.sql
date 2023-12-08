@@ -1,3 +1,5 @@
+create database gift charset = "utf8mb4";
+
 create table projects
 (
     id             int auto_increment primary key,

@@ -9,13 +9,13 @@
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/test?useSSL=false"/>
+                <property name="url" value="jdbc:mysql://mysql:23306/gift?useSSL=false"/>
                 <property name="username" value="root"/>
-                <property name="password" value=""/>
+                <property name="password" value="root"/>
             </dataSource>
         </environment>
     </environments>
     <mappers>
-        <mapper resource="org/giftorg/spark.mapper/ProjectMapper.xml"/>
+        <mapper resource="org/giftorg/scheduler.mapper/ProjectMapper.xml"/>
     </mappers>
 </configuration>

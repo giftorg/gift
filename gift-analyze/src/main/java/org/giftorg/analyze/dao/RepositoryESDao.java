@@ -29,53 +29,87 @@ import java.util.UUID;
 
 @Slf4j
 public class RepositoryESDao implements Serializable {
+    public static final String index = "gift_repository";
+
+    public static final String repoId = "repoId";
+
+    public static final String name = "name";
+
+    public static final String fullName = "fullName";
+
+    public static final String stars = "stars";
+
+    public static final String author = "author";
+
+    public static final String url = "url";
+
+    public static final String description = "description";
+
+    public static final String size = "size";
+
+    public static final String defaultBranch = "defaultBranch";
+
+    public static final String readme = "readme";
+
+    public static final String readmeCn = "readmeCn";
+
+    public static final String tags = "tags";
+
+    public static final String hdfsPath = "hdfsPath";
+
+    /**
+     * 初始化 repository 索引，提供于项目初始化时使用
+     */
     public static void init() throws IOException {
         Elasticsearch.EsClient().indices().create(c -> c
-                .index("gift_repository")
+                .index(index)
                 .mappings(m -> m
-                        .properties("repoId", p -> p.integer(k -> k))
-                        .properties("name", p -> p.text(k -> k
+                        .properties(repoId, p -> p.integer(k -> k))
+                        .properties(name, p -> p.text(k -> k
                                 .analyzer(Elasticsearch.IK_MAX_WORD_ANALYZER)
                         ))
-                        .properties("fullName", p -> p.keyword(k -> k))
-                        .properties("stars", p -> p.integer(k -> k
+                        .properties(fullName, p -> p.keyword(k -> k))
+                        .properties(stars, p -> p.integer(k -> k
                                 .index(false)
                         ))
-                        .properties("author", p -> p.keyword(k -> k))
-                        .properties("url", p -> p.keyword(k -> k))
-                        .properties("description", p -> p.text(k -> k
+                        .properties(author, p -> p.keyword(k -> k))
+                        .properties(url, p -> p.keyword(k -> k))
+                        .properties(description, p -> p.text(k -> k
                                 .analyzer(Elasticsearch.IK_MAX_WORD_ANALYZER)
                                 .searchAnalyzer(Elasticsearch.IK_SMART_ANALYZER)
                         ))
-                        .properties("size", p -> p.integer(k -> k
+                        .properties(size, p -> p.integer(k -> k
                                 .index(false)
                         ))
-                        .properties("defaultBranch", p -> p.keyword(k -> k
+                        .properties(defaultBranch, p -> p.keyword(k -> k
                                 .index(false)
                         ))
-                        .properties("readme", p -> p.text(k -> k
+                        .properties(readme, p -> p.text(k -> k
                                 .analyzer(Elasticsearch.IK_MAX_WORD_ANALYZER)
                                 .searchAnalyzer(Elasticsearch.IK_SMART_ANALYZER)
                         ))
-                        .properties("readmeCn", p -> p.text(k -> k
+                        .properties(readmeCn, p -> p.text(k -> k
                                 .analyzer(Elasticsearch.IK_MAX_WORD_ANALYZER)
                                 .searchAnalyzer(Elasticsearch.IK_SMART_ANALYZER)
                         ))
-                        .properties("tags", p -> p.text(k -> k
+                        .properties(tags, p -> p.text(k -> k
                                 .analyzer(Elasticsearch.IK_MAX_WORD_ANALYZER)
                                 .searchAnalyzer(Elasticsearch.IK_SMART_ANALYZER)
                         ))
-                        .properties("hdfsPath", p -> p.keyword(k -> k
+                        .properties(hdfsPath, p -> p.keyword(k -> k
                                 .index(false)
                         ))
                 )
         );
     }
 
+    /**
+     * 插入仓库信息到 Elasticsearch
+     */
     public void insert(Repository repo) throws IOException {
         log.info("insert repository: {}", this);
         Elasticsearch.EsClient().create(c -> c
-                .index("gift_repository")
+                .index(index)
                 .id(UUID.randomUUID().toString())
                 .document(repo)
         );

@@ -31,6 +31,9 @@ public class Properties {
     public HDFSProperties hdfs;
     public XingHouProperties xingHou;
     public ChatGPTProperties chatGPT;
+    public ChatGLMProperties chatGLM;
+    public KafkaProperties kafka;
+    public ElasticsearchProperties elasticsearch;
 
 
     @Data
@@ -52,10 +55,27 @@ public class Properties {
 
     @Data
     public static class ChatGPTProperties {
-        private String baseUrl;
+        private String host;
 
         private List<String> apiKeys;
 
         private String model;
+    }
+
+    @Data
+    public static class ChatGLMProperties {
+        private String hostUrl;
+
+        private String apiKey;
+    }
+
+    @Data
+    public static class KafkaProperties {
+        private String hostUrl;
+    }
+
+    @Data
+    public static class ElasticsearchProperties {
+        private String hostUrl;
     }
 }

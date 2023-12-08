@@ -19,53 +19,77 @@
 package org.giftorg.common.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.giftorg.common.config.Config;
 import org.giftorg.common.utils.StringUtil;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HDFS 持久层操作
+ * Hadoop Distributed File System 操作
  */
 public class HDFS {
     private static final String addr = StringUtil.trimEnd(Config.hdfsConfig.getAddr(), "/");
     private static final String reposPath = StringUtil.trimEnd(Config.hdfsConfig.getReposPath(), "/");
 
+    private static final FileSystem fs;
+
+    static {
+        try {
+            fs = FileSystem.get(new Configuration());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 返回 HDFS 文件路径
+     * 如输入 /repos/xxx.txt，返回 hdfs://localhost:9000/repos/xxx.txt
+     */
     public static Path hdfsPath(String path) {
         return new Path(addr + path);
     }
 
+    /**
+     * 返回 HDFS 仓库文件路径
+     * 如输入 /xxx.txt，假设配置中指定仓库路径为 /repos，返回 hdfs://localhost:9000/repos/xxx.txt
+     */
     public static String hdfsRepoPath(String path) {
         return hdfsPath(hdfsRepoRelPath(path)).toString();
     }
 
+    /**
+     * 返回 HDFS 仓库文件相对路径
+     * 如输入 /xxx.txt，假设配置中指定仓库路径为 /repos，返回 /repos/xxx.txt
+     */
     public static String hdfsRepoRelPath(String path) {
         return reposPath + path;
     }
 
     /**
-     * 上传文件
+     * 上传文件到 HDFS
      */
     public static void put(String src, String dst) throws IOException {
-        Configuration conf = new Configuration();
-        FileSystem fs = FileSystem.get(conf);
         fs.copyFromLocalFile(new Path(src), hdfsPath(dst));
     }
 
     /**
-     * DFS 遍历指定路径下所有文件
+     * 深度优先遍历指定 HDFS 路径下所有文件
      */
-    public static void dfs(FileSystem fs, Path path, List<String> list) throws IOException {
+    private static void dfs(Path path, List<String> list) throws IOException {
         FileStatus[] fileStatuses = fs.listStatus(path);
 
         for (FileStatus status : fileStatuses) {
             if (status.isDirectory()) {
-                dfs(fs, status.getPath(), list);
+                dfs(status.getPath(), list);
             } else {
                 list.add(StringUtil.trimStart(status.getPath().toString(), addr));
             }
@@ -73,14 +97,11 @@ public class HDFS {
     }
 
     /**
-     * 获取仓库列表下所有文件
+     * 获取 HDFS 指定路径下所有文件
      */
     public static List<String> getRepoFiles(String path) throws IOException {
-        Configuration conf = new Configuration();
-        FileSystem fs = FileSystem.get(conf);
-
         List<String> result = new ArrayList<>();
-        dfs(fs, new Path(path), result);
+        dfs(new Path(path), result);
 
         return result;
     }

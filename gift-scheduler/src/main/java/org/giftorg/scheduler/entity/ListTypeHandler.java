@@ -26,6 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * MyBatis List 类型处理器
+ */
 public class ListTypeHandler implements TypeHandler<List<String>> {
     @Override
     public void setParameter(PreparedStatement ps, int i, List<String> parameter, JdbcType jdbcType) throws SQLException {
