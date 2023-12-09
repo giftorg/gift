@@ -19,12 +19,15 @@
 
 package org.giftorg.analyze.dao;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import lombok.extern.slf4j.Slf4j;
 import org.giftorg.analyze.entity.Repository;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -115,8 +118,35 @@ public class RepositoryESDao implements Serializable {
         );
     }
 
+    /**
+     * 查询仓库
+     */
+    public List<Repository> retrieval(String text) throws Exception {
+        List<Repository> repositories = new ArrayList<>();
+        Elasticsearch.EsClient().search(
+                search -> search.index(index).query(query -> query
+                        .multiMatch(m -> m
+                                .query(text)
+                                .fields(name, description, readme, readmeCn, tags)
+                                .operator(Operator.Or)
+                        )
+                ),
+                Repository.class
+        ).hits().hits().forEach(r -> {
+            repositories.add(r.source());
+        });
+        return repositories;
+    }
+
     public static void main(String[] args) throws Exception {
         init();
+        testRetrievalResponse("elasticsearch");
         Elasticsearch.close();
+    }
+
+    public static void testRetrievalResponse(String text) throws Exception {
+        RepositoryESDao rd = new RepositoryESDao();
+        List<Repository> repositories = rd.retrieval(text);
+        repositories.forEach(System.out::println);
     }
 }

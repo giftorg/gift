@@ -20,6 +20,7 @@
 package org.giftorg.common.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -49,6 +50,7 @@ public class Elasticsearch {
     // ik_smart: 粗粒度分词器
     public static final String IK_MAX_WORD_ANALYZER = "ik_max_word";
     public static final String IK_SMART_ANALYZER = "ik_smart";
+    public static final String WHITE_SPACE_ANALYZER = "whitespace";
 
     static {
         restClient = RestClient
@@ -110,13 +112,13 @@ public class Elasticsearch {
     /**
      * 使用指定值过滤，并向量化检索文档
      * @param index es 索引
-     * @param textField es 索引中的文本字段
+     * @param textFields es 索引中的文本字段
      * @param text 待检索的文本
      * @param embeddingField es 索引中的向量字段
      * @param type 返回的文档类型
      * @return 检索结果，仅包含过滤后的文档，按相似度降序排列
      */
-    public static <T> List<T> retrieval(String index, String textField, String text, String embeddingField, Class<T> type) throws Exception {
+    public static <T> List<T> retrieval(String index, List<String> textFields, String text, String embeddingField, Class<T> type) throws Exception {
         BigModel model = new ChatGLM();
         List<Double> embedding = model.textEmbedding(text);
 
@@ -127,7 +129,11 @@ public class Elasticsearch {
                                         .source("cosineSimilarity(params.query_vector, '" + embeddingField + "') + 1.0")
                                         .params("query_vector", JsonData.of(embedding))
                                 ))
-                                .query(q -> q.match(ma -> ma.field(textField).query(text)))
+                                .query(q -> q.multiMatch(mm -> mm
+                                        .query(text).
+                                        fields(textFields).
+                                        operator(Operator.Or)
+                                ))
                         )
                 ),
                 type

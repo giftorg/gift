@@ -66,10 +66,14 @@ public class JavaCodeSpliter implements CodeSpliter {
         try {
             List<Function> result = new ArrayList<>();
 
-            List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
+            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cls -> {
+                // 跳过接口与抽象类，因为这部分一般没有实现方法
+                if (cls.isInterface()) return;
+                if (cls.isAbstract()) return;
 
-            for (ClassOrInterfaceDeclaration cls : classes) {
-                if (cls.isInterface()) continue;
+                // 跳过长度较短的代码，一般没有作用
+                // TODO: 算是一种比较暴力的判断，待优化
+                if (cls.toString().split("\n").length < 15) return;
 
                 Function func = new Function();
                 func.setName(cls.getNameAsString());
@@ -78,7 +82,7 @@ public class JavaCodeSpliter implements CodeSpliter {
                 func.setEnd(cls.getEnd().isPresent() ? new Position(cls.getEnd().get()) : null);
                 func.setLanguage(LANGUAGE_JAVA);
                 result.add(func);
-            }
+            })
 
             /* 按函数拆分版本（已弃用）
               cu.findAll(MethodDeclaration.class).forEach(method -> {
@@ -107,8 +111,8 @@ public class JavaCodeSpliter implements CodeSpliter {
                 func.setEnd(method.getEnd().isPresent() ? new Position(method.getEnd().get()) : null);
                 func.setLanguage(LANGUAGE_JAVA);
                 result.add(func);
-              });
-             */
+            });
+             */;
 
             return result;
 

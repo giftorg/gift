@@ -27,6 +27,7 @@ import org.giftorg.common.bigmodel.impl.XingHuo;
 import org.giftorg.common.tokenpool.TokenPool;
 import org.giftorg.common.utils.CharsetUtil;
 import org.giftorg.common.utils.MarkdownUtil;
+import org.giftorg.common.utils.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -87,25 +88,28 @@ public class Repository implements Serializable, Cloneable {
         return (Repository) super.clone();
     }
 
+    private static final String REPOSITORY_TRANSLATION_PROMPT = "去除以上文档中任何链接、许可等无关内容，使用中文总结上面的内容，保留核心文字描述，且必须保留文档中的名词、相关的项目名称。";
+
     /**
      * 翻译项目文档
      */
     public void translation() throws Exception {
         if (isTranslated) return;
         if (!CharsetUtil.isChinese(readme)) {
-//            List<BigModel.Message> messages = new ArrayList<>();
             List<BigModel.Message> messages = readmeContentMessages();
-//            messages.add(new BigModel.Message("user", readme));
-            messages.add(new BigModel.Message("user", "去除以上文档中任何链接、许可等无关内容，只保留核心文本描述，使用中文概括上面的内容。"));
+            messages.add(new BigModel.Message("user", REPOSITORY_TRANSLATION_PROMPT));
             readmeCn = xingHuo.chat(messages);
             // TODO: 添加更优的判断方式
-            // TODO: 根据星火响应的特征，失败时会响应 “很抱歉，您没有提供任何文档或链接供我删除无关内容。请提供相关文档或链接，我将为您删除其中的无关内容并使用中文概括核心文本描述。”
-            if (readmeCn.contains("抱歉")) throw new Exception("translation failed, xinghuo response: " + readmeCn);
+            // TODO: 根据星火响应的特征，失败时一般会响应 “很抱歉，您没有提供任何文档或链接供我删除无关内容。请提供相关文档或链接，我将为您删除其中的无关内容并使用中文概括核心文本描述。”
+            if (readmeCn.contains("抱歉") || readmeCn.contains("对不起")) throw new Exception("translation failed, xinghuo response: " + readmeCn);
         } else {
             readmeCn = readme;
         }
         isTranslated = true;
     }
+
+    // 根据用户输入的项目文档，生成与项目相关的中文搜索词列表，尽量详细覆盖大部分可能的搜索词，回答以英文逗号分隔。回答示例："管理系统,电商,秒杀,MySQL,Redis,Spring";
+    private static final String REPOSITORY_TAGGING_PROMPT = "Generate a Chinese keyword list related to the project based on the user-inputted project documents, aiming to cover as many possible search terms in detail as possible. Provide the answers separated by English commas.\nExample answer: \"管理系统,电商,秒杀,MySQL,Redis,Spring\"\n";
 
     /**
      * 获取项目关键词列表
@@ -115,9 +119,9 @@ public class Repository implements Serializable, Cloneable {
         List<BigModel.Message> messages = new ArrayList<>();
         // TODO: 添加是否已翻译判断？
         messages.add(new BigModel.Message("user", readmeCn));
-        messages.add(new BigModel.Message("system", "Based on the user-inputted project documents, generate a list of Chinese keywords related to the project. Provide the answer in the format of comma-separated English keywords.\nAnswer example: \"Java,MySQL,Redis,管理系统,电商\"\n"));
+        messages.add(new BigModel.Message("system", REPOSITORY_TAGGING_PROMPT));
         String answer = gpt.chat(messages);
-        tags = Arrays.asList(answer.split(",\\s*"));
+        tags = Arrays.asList(StringUtil.trimEnd(answer, ".").split(",\\s*"));
         isTagged = true;
     }
 

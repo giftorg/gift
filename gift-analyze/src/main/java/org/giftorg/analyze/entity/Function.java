@@ -19,6 +19,7 @@
 
 package org.giftorg.analyze.entity;
 
+import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.giftorg.common.bigmodel.BigModel;
@@ -27,7 +28,9 @@ import org.giftorg.common.bigmodel.impl.ChatGPT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 代码实体
@@ -53,6 +56,11 @@ public class Function implements Serializable {
 
     private String filePath;
 
+    /**
+     * 技术栈列表，以空格分隔
+     */
+    private String technologyStack;
+
     public void setRepoId(Integer repoId) {
         this.repoId = repoId;
     }
@@ -61,79 +69,66 @@ public class Function implements Serializable {
         this.filePath = filePath;
     }
 
+    /* prompt
+    分析用户输入的Java方法代码，回答一个json字符串。
+    json结构包含3个字段：
+    1. name: 方法的名称；
+    2. desc: 采用中文描述方法处理的业务，30到50字/词；
+    3. techs：与该方法相关的搜索词列表，以中文为主，术语可用英文，多个单词拆分成多个元素，搜索词列表要尽量全面。
+    回答示例：
+    {
+      "name": "retrieval",
+      "desc": "通过指定值过滤并向量化检索文档，实现基于向量化的文档相似度查询",
+      "techs": ["elasticsearch", "向量化", "检索", "dense", "vector", "相似度", "检索", "文本", "文本匹配"]
+    }
+     */
+    private static final String FUNCTION_ANALYZE_PROMPT = "Analyze Java method code provided by the user and respond with a JSON string. The JSON structure includes three fields:\n" +
+            "1. name: The name of the method;\n" +
+            "2. desc: A Chinese description (30 to 50 characters/words) of the business process handled by the method;\n" +
+            "3. techs: A list of search terms related to the method, primarily in Chinese with English terms allowed. If a term consists of multiple words, break them into separate elements. The search term list should be as comprehensive as possible.\n" +
+            "Example response:\n" +
+            "{\n" +
+            "  \"name\": \"retrieval\",\n" +
+            "  \"desc\": \"通过指定值过滤并向量化检索文档，实现基于向量化的文档相似度查询\",\n" +
+            "  \"techs\": [\"elasticsearch\", \"向量化\", \"检索\", \"dense\", \"vector\", \"相似度\", \"检索\", \"文本\", \"文本匹配\"]\n" +
+            "}";
 
     /**
      * 代码分析与向量化
      */
-    public void analyze() {
+    public Boolean analyze() {
         // 获取函数的描述信息
         BigModel gpt = new ChatGPT();
         try {
             description = gpt.chat(new ArrayList<BigModel.Message>() {{
-                /* prompt:
-                    分析用户输入的Java类代码，回答一个json字符串。描述类中核心方法的作用。
-                    外层包含两个字段：
-                    1. methods，类中的核心方法列表。
-                    2. techs：类中涉及到的技术名词列表。
-                    每个方法包含3个字段：
-                    1. name: 方法的名称；
-                    2. desc: 采用中文描述方法的作用，不超过50字；
-                    3. techs：方法使用到的技术名词列表。
-                    回答示例：
-                    {
-                      "methods": [
-                        {
-                          "name": "EsClient",
-                          "desc": "返回Elasticsearch客户端单例",
-                          "techs": [ "RestClient", "JacksonJsonpMapper" ]
-                        },
-                        {
-                          "name": "retrieval",
-                          "desc": "通过指定值过滤并向量化检索文档",
-                          "techs": [ "scriptScore", "cosineSimilarity" ]
-                        }
-                      ],
-                      "techs": ["Elasticsearch", "Java", "RestClient", "JacksonJsonpMapper", "scriptScore", "cosineSimilarity", "向量化", "检索"]
-                    }
-                 */
-                String prompt = "Analyze user-input Java class code and generate a JSON string answering the description of core methods in the class. The outer structure includes two fields:\n" +
-                        "1. methods: a list of core methods in the class.\n" +
-                        "2. techs: a list of technical terms involved in the class.\n" +
-                        "Each method consists of three fields:\n" +
-                        "1. name: the name of the method.\n" +
-                        "2. desc: a Chinese description of the method's function in no more than 50 characters.\n" +
-                        "3. techs: a list of technical terms used by the method.\n" +
-                        "Example response:\n" +
-                        "{\n" +
-                        "  \"methods\": [\n" +
-                        "    {\n" +
-                        "      \"name\": \"EsClient\",\n" +
-                        "      \"desc\": \"返回Elasticsearch客户端单例\",\n" +
-                        "      \"techs\": [ \"RestClient\", \"JacksonJsonpMapper\" ]\n" +
-                        "    },\n" +
-                        "    {\n" +
-                        "      \"name\": \"retrieval\",\n" +
-                        "      \"desc\": \"通过指定值过滤并向量化检索文档\",\n" +
-                        "      \"techs\": [ \"scriptScore\", \"cosineSimilarity\" ]\n" +
-                        "    }\n" +
-                        "  ],\n" +
-                        "  \"techs\": [\"Elasticsearch\", \"Java\", \"RestClient\", \"JacksonJsonpMapper\", \"scriptScore\", \"cosineSimilarity\", \"向量化\", \"检索\"]\n" +
-                        "}";
-//                add(new BigModel.Message("system", "Write a Chinese comment in one line, not exceeding 50 characters, for the user-inputted function, describing the function's purpose.\nInput example: \"public static void add(int a, int b) { return a + b; }\"\nOutput example: \"计算两位整数的和\""));
                 add(new BigModel.Message("user", source));
-                add(new BigModel.Message("system", prompt));
+                add(new BigModel.Message("system", FUNCTION_ANALYZE_PROMPT));
             }});
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("ChatGPT call failed: " + e);
+        }
+        if (description.isEmpty()) {
+            throw new RuntimeException("ChatGPT call failed, empty response.");
         }
 
-        // 将代码描述向量化
+        // 解析代码结果
+        FunctionAnalyzeResult result;
+        try {
+            result = JSONUtil.toBean(description, FunctionAnalyzeResult.class);
+        } catch (Exception ignored) {
+            throw new RuntimeException("function analysis failed and the ChatGPT response failed to be parsed.");
+        }
+        technologyStack = String.join(" ", result.getTechs());
+        description = result.getDesc();
+
+        // 生成文本嵌入向量
         BigModel glm = new ChatGLM();
         try {
             embedding = glm.textEmbedding(description);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return true;
     }
 
     @Override

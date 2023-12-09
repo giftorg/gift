@@ -11,6 +11,7 @@ chatGPT:
     - ...
     - sk-xxx_n
 
+
 xingHou:
   hostUrl: https://spark-api.xf-yun.com/v3.1/chat
   appid: xxx

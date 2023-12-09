@@ -23,7 +23,6 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.giftorg.analyze.dao.FunctionESDao;
 import org.giftorg.analyze.entity.AnalyzeTask;
 import org.giftorg.analyze.entity.Repository;
 import org.giftorg.common.elasticsearch.Elasticsearch;
@@ -35,7 +34,9 @@ import org.giftorg.common.tokenpool.TokenPool;
 public class AnalyzeApplication {
 
     public static void main(String[] args) {
-        SparkConf conf = new SparkConf().setAppName("GiftAnalyzer").setMaster("local[*]");
+        // 本地启动请指定 master 为 local[*]
+        // SparkConf conf = new SparkConf().setAppName("GiftAnalyzer").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName("GiftAnalyzer");
         SparkContext sc = new SparkContext(conf);
 
         KafkaConsumerClient consumer = new KafkaConsumerClient(AnalyzeTask.TOPIC, "gift");
@@ -66,15 +67,5 @@ public class AnalyzeApplication {
                 }
             });
         }
-    }
-
-    public static void testEmbedding(String query) {
-        FunctionESDao fd = new FunctionESDao();
-        try {
-            fd.retrieval(query).forEach(System.out::println);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        Elasticsearch.close();
     }
 }

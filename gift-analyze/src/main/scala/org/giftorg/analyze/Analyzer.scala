@@ -48,7 +48,6 @@ class Analyzer(val sc: SparkContext) extends Serializable {
   private def analyzeRepository(repository: Repository): Unit = {
     // 获取仓库中所有文件
     val files = HDFS.getRepoFiles(repository.hdfsPath).asScala.toArray
-    var docs = List.empty[(String, String)]
 
     files.foreach(file => {
       if (file.endsWith("README.md")) {
@@ -56,7 +55,7 @@ class Analyzer(val sc: SparkContext) extends Serializable {
         handleDoc(repository, file)
       } else {
         // 其它文件进行代码分析
-         analyzeCode(repository.id, file)
+        analyzeCode(repository.id, file)
       }
     })
   }
@@ -65,18 +64,20 @@ class Analyzer(val sc: SparkContext) extends Serializable {
    * 代码文件分析
    */
   private def analyzeCode(repoId: Integer, file: String): Unit = {
+    // TODO: 支持更多语言
     if (file.endsWith(".java")) {
-      val fileRDD = sc.wholeTextFiles(file)
-      fileRDD.flatMap(file => {
+      sc.wholeTextFiles(file).flatMap(file => {
         val analyzer = new JavaCodeSpliter()
         val functions = analyzer.splitFunctions(new ByteArrayInputStream(file._2.getBytes()))
         functions.asScala.toList
       }).map(function => {
-        function.analyze()
+        val isOfHighValue = function.analyze()
         function.setRepoId(repoId)
         function.setFilePath(file)
-        function
+        if (isOfHighValue) function
+        else null
       }).collect().foreach(function => {
+        if (function == null) return
         try {
           fd.insert(function)
           log.info("analyze function success: {}", function)

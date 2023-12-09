@@ -25,6 +25,7 @@ import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +55,8 @@ public class FunctionESDao implements Serializable {
 
     public static final String filePath = "filePath";
 
+    public static final String technologyStack = "technologyStack";
+
     /**
      * 初始化 function 索引，提供于项目初始化时使用
      */
@@ -79,6 +82,10 @@ public class FunctionESDao implements Serializable {
                         .properties(language, p -> p.keyword(k -> k))
                         .properties(repoId, p -> p.integer(k -> k))
                         .properties(filePath, p -> p.keyword(k -> k))
+                        .properties(technologyStack, p -> p.text(t -> t
+                                .analyzer(Elasticsearch.WHITE_SPACE_ANALYZER)
+                                .searchAnalyzer(Elasticsearch.IK_SMART_ANALYZER)
+                        ))
                 )
         );
     }
@@ -99,11 +106,20 @@ public class FunctionESDao implements Serializable {
      * 从 Elasticsearch 检索指定业务代码
      */
     public List<Function> retrieval(String text) throws Exception {
-        return Elasticsearch.retrieval(index, description, text, embedding, Function.class);
+        return Elasticsearch.retrieval(index, Arrays.asList(description, technologyStack), text, embedding, Function.class);
     }
 
     public static void main(String[] args) throws Exception {
         init();
+//        testEmbedding("参数校验");
         Elasticsearch.close();
+    }
+
+    public static void testEmbedding(String text) throws Exception {
+        FunctionESDao fd = new FunctionESDao();
+        fd.retrieval(text).forEach(f -> log.info(
+                "function-{}\n{}\n{}\n" + "```\n{}\n```\n\n\n",
+                f.getName(), f.getDescription(), f.getTechnologyStack(), f.getSource()
+        ));
     }
 }

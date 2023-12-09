@@ -17,31 +17,21 @@
  * limitations under the License.
  */
 
-package org.giftorg.common.utils;
+package org.giftorg.analyze.entity;
 
-import com.vladsch.flexmark.ast.Text;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.ast.Node;
+import lombok.Data;
 
-public class MarkdownUtil {
-    /**
-     * 提取 markdown 中的文本
-     */
-    public static String extractText(String markdown) {
-        Parser parser = Parser.builder().build();
-        Node document = parser.parse(markdown);
-        return extractText(document);
-    }
+import java.util.List;
 
-    private static String extractText(Node node) {
-        StringBuilder sb = new StringBuilder();
-        for (Node child : node.getChildren()) {
-            if (child instanceof Text) {
-                sb.append(child.getChars());
-            } else {
-                sb.append(extractText(child));
-            }
-        }
-        return sb.toString();
-    }
+/**
+ * ChatGPT 代码分析响应结构
+ */
+@Data
+public class FunctionAnalyzeResult {
+
+    private String name;
+
+    private String desc;
+
+    private List<String> techs;
 }
