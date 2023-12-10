@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class Properties {
 
+    public SparkProperties spark;
     public HDFSProperties hdfs;
     public XingHouProperties xingHou;
     public ChatGPTProperties chatGPT;
@@ -35,6 +36,10 @@ public class Properties {
     public KafkaProperties kafka;
     public ElasticsearchProperties elasticsearch;
 
+    @Data
+    public static class SparkProperties {
+        private String master;
+    }
 
     @Data
     public static class HDFSProperties {

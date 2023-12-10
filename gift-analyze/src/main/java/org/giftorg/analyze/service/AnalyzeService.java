@@ -17,15 +17,13 @@
  * limitations under the License.
  */
 
-package org.giftorg.common.translate.result;
+package org.giftorg.analyze.service;
 
-import lombok.Data;
+import org.giftorg.analyze.entity.Repository;
 
-import java.util.List;
+import java.io.IOException;
 
-@Data
-public class TranslateResult {
-    private String requestId;
-    private List<String> translation;
-    private String errorCode;
+public interface AnalyzeService {
+
+    void run(Repository repository) throws IOException;
 }

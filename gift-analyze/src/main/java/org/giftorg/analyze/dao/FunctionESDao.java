@@ -19,15 +19,14 @@
 
 package org.giftorg.analyze.dao;
 
+import cn.hutool.core.lang.func.Func;
 import lombok.extern.slf4j.Slf4j;
 import org.giftorg.analyze.entity.Function;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 public class FunctionESDao implements Serializable {
@@ -106,12 +105,21 @@ public class FunctionESDao implements Serializable {
      * 从 Elasticsearch 检索指定业务代码
      */
     public List<Function> retrieval(String text) throws Exception {
-        return Elasticsearch.retrieval(index, Arrays.asList(description, technologyStack), text, embedding, Function.class);
+        List<Function> funcs = Elasticsearch.retrieval(index, Arrays.asList(description, technologyStack), text, embedding, Function.class);
+        List<Function> result = new ArrayList<>();
+        Set<String> sourceSet = new HashSet<>();
+        funcs.forEach(func -> {
+            if (!sourceSet.contains(func.getSource())) {
+                result.add(func);
+                sourceSet.add(func.getSource());
+            }
+        });
+        return result;
     }
 
     public static void main(String[] args) throws Exception {
-        init();
-//        testEmbedding("参数校验");
+//        init();
+        testEmbedding("Redis如何设置分布式锁");
         Elasticsearch.close();
     }
 

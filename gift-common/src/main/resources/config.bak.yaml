@@ -1,3 +1,7 @@
+spark:
+  master: local[*]
+
+
 hdfs:
   addr: hdfs://master:8020
   reposPath: /gift/repositories

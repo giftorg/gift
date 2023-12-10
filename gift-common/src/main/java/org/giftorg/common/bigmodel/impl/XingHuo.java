@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -46,7 +47,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class XingHuo extends WebSocketListener implements BigModel {
+public class XingHuo extends WebSocketListener implements Serializable, BigModel {
     private static final String hostUrl = Config.xingHouConfig.getHostUrl();
     private static final String appid = Config.xingHouConfig.getAppid();
     private static final String apiSecret = Config.xingHouConfig.getApiSecret();

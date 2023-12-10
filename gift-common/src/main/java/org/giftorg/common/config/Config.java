@@ -36,6 +36,7 @@ import java.util.Map;
 public class Config {
     private static final String DEFAULT_CONFIG_PATH = "config.yaml";
 
+    public static Properties.SparkProperties sparkConfig;
     public static Properties.HDFSProperties hdfsConfig;
     public static Properties.XingHouProperties xingHouConfig;
     public static Properties.ChatGPTProperties chatGPTConfig;
@@ -92,6 +93,7 @@ public class Config {
             throw new RuntimeException(e);
         }
 
+        sparkConfig = config.spark;
         hdfsConfig = config.hdfs;
         xingHouConfig = config.xingHou;
         chatGPTConfig = config.chatGPT;

@@ -28,9 +28,7 @@ import org.giftorg.common.bigmodel.impl.ChatGPT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 代码实体
@@ -137,12 +135,9 @@ public class Function implements Serializable {
                 "name='" + name + '\'' +
                 ", source='" + source + '\'' +
                 ", description='" + description + '\'' +
-                ", embedding=" + embedding +
-                ", begin=" + begin +
-                ", end=" + end +
-                ", language='" + language + '\'' +
                 ", repoId=" + repoId +
                 ", filePath='" + filePath + '\'' +
+                ", technologyStack='" + technologyStack + '\'' +
                 '}';
     }
 }

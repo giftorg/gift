@@ -31,6 +31,7 @@ import org.giftorg.common.config.Config;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-public class ChatGLM implements BigModel {
+public class ChatGLM implements Serializable, BigModel {
     private static final String API_URL = Config.chatGLMConfig.getHostUrl();
     private static final String API_KEY = Config.chatGLMConfig.getApiKey();
 

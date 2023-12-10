@@ -25,6 +25,9 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.giftorg.analyze.entity.AnalyzeTask;
 import org.giftorg.analyze.entity.Repository;
+import org.giftorg.analyze.service.AnalyzeService;
+import org.giftorg.analyze.service.impl.AnalyzeServiceImpl;
+import org.giftorg.common.config.Config;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 import org.giftorg.common.kafka.KafkaConsumerClient;
 import org.giftorg.common.kafka.KafkaProducerClient;
@@ -34,14 +37,14 @@ import org.giftorg.common.tokenpool.TokenPool;
 public class AnalyzeApplication {
 
     public static void main(String[] args) {
-        // 本地启动请指定 master 为 local[*]
-        // SparkConf conf = new SparkConf().setAppName("GiftAnalyzer").setMaster("local[*]");
-        SparkConf conf = new SparkConf().setAppName("GiftAnalyzer");
+        SparkConf conf = new SparkConf()
+                .setAppName("GiftAnalyzer")
+                .setMaster(Config.sparkConfig.getMaster());
         SparkContext sc = new SparkContext(conf);
 
         KafkaConsumerClient consumer = new KafkaConsumerClient(AnalyzeTask.TOPIC, "gift");
         KafkaProducerClient producer = new KafkaProducerClient();
-        Analyzer analyzer = new Analyzer(sc);
+        AnalyzeService analyzer = new AnalyzeServiceImpl(sc);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             sc.stop();

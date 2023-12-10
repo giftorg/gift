@@ -19,7 +19,7 @@
 
 package org.giftorg.analyze.entity;
 
-import lombok.ToString;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.giftorg.common.bigmodel.BigModel;
 import org.giftorg.common.bigmodel.impl.ChatGPT;
@@ -35,39 +35,35 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@ToString
+@Data
 public class Repository implements Serializable, Cloneable {
-    private final BigModel gpt = new ChatGPT();
+    private Integer id;
 
-    private final BigModel xingHuo = new XingHuo();
+    private Integer repoId;
 
-    public Integer id;
+    private String name;
 
-    public Integer repoId;
+    private String fullName;
 
-    public String name;
+    private Integer stars;
 
-    public String fullName;
+    private String author;
 
-    public Integer stars;
+    private String url;
 
-    public String author;
+    private String description;
 
-    public String url;
+    private Integer size;
 
-    public String description;
+    private String defaultBranch;
 
-    public Integer size;
+    private String readme;
 
-    public String defaultBranch;
+    private String readmeCn;
 
-    public String readme;
+    private List<String> tags;
 
-    public String readmeCn;
-
-    public List<String> tags;
-
-    public String hdfsPath;
+    private String hdfsPath;
 
     private boolean isTranslated = false;
 
@@ -96,12 +92,14 @@ public class Repository implements Serializable, Cloneable {
     public void translation() throws Exception {
         if (isTranslated) return;
         if (!CharsetUtil.isChinese(readme)) {
+            BigModel xingHuo = new XingHuo();
             List<BigModel.Message> messages = readmeContentMessages();
             messages.add(new BigModel.Message("user", REPOSITORY_TRANSLATION_PROMPT));
             readmeCn = xingHuo.chat(messages);
             // TODO: 添加更优的判断方式
             // TODO: 根据星火响应的特征，失败时一般会响应 “很抱歉，您没有提供任何文档或链接供我删除无关内容。请提供相关文档或链接，我将为您删除其中的无关内容并使用中文概括核心文本描述。”
-            if (readmeCn.contains("抱歉") || readmeCn.contains("对不起")) throw new Exception("translation failed, xinghuo response: " + readmeCn);
+            if (readmeCn.contains("抱歉") || readmeCn.contains("对不起"))
+                throw new Exception("translation failed, xinghuo response: " + readmeCn);
         } else {
             readmeCn = readme;
         }
@@ -116,6 +114,7 @@ public class Repository implements Serializable, Cloneable {
      */
     public void tagging() throws Exception {
         if (isTagged) return;
+        BigModel gpt = new ChatGPT();
         List<BigModel.Message> messages = new ArrayList<>();
         // TODO: 添加是否已翻译判断？
         messages.add(new BigModel.Message("user", readmeCn));
