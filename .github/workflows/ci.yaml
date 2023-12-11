@@ -17,18 +17,5 @@ jobs:
           java-version: '8'
           scala-version: '2.12.0'
 
-      - name: Maven check the main module
-        run: |
-          if [ -e pom.xml ]; then
-            echo "Processing main module"
-            mvn -B clean verify
-          fi
-
-      - name: Maven checks the submodules
-        run: |
-          for dir in $(find . -name "pom.xml" -exec dirname {} \;); do
-            if [ "$dir" != "." ]; then
-              echo "Processing submodule: $dir"
-              (cd $dir && mvn -B clean verify)
-            fi
-          done
+      - name: Maven check
+        run: mvn clean verify

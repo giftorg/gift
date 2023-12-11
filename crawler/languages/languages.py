@@ -23,13 +23,14 @@ class Languages(Enum):
     编程语言列表枚举
     """
 
+    # 目前仅支持Java代码分析
     JAVA = 'Java'
-    PYTHON = 'Python'
-    C_PLUS = 'C++'
-    C = 'C'
-    GO = 'Go'
-    JAVA_SCRIPT = 'JavaScript'
-    PHP = 'PHP'
-    RUBY = 'Ruby'
-    SHELL = 'shell'
-    TYPE_SCRIPT = 'Typescript'
+    # PYTHON = 'Python'
+    # C_PLUS = 'C++'
+    # C = 'C'
+    # GO = 'Go'
+    # JAVA_SCRIPT = 'JavaScript'
+    # PHP = 'PHP'
+    # RUBY = 'Ruby'
+    # SHELL = 'shell'
+    # TYPE_SCRIPT = 'Typescript'
