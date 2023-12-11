@@ -16,8 +16,6 @@
 # limitations under the License.
 
 import logging
-import time
-from typing import List
 
 import pymysql.cursors
 
@@ -36,28 +34,20 @@ class ProjectDao:
             cursorclass=pymysql.cursors.DictCursor
         )
 
-    def insert(self, project: Project):
+    def insert(self, project: Project) -> bool:
         try:
             with self.connection.cursor() as cursor:
-                sql = "INSERT INTO `projects` (`item_name`, `stars`, `login_name`, `repository`, `description`,`size`,`id`,`full_name`,`default_branch`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                sql = "INSERT INTO `projects` (`repo_id`, `name`, `full_name`, `stars`, `author`, `url`, `description`, `size`, `default_branch`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 logging.info("execute: " + sql % project.to_list())
                 cursor.execute(sql, project.to_list())
                 self.connection.commit()
         except pymysql.err.IntegrityError:
             logging.warning(f"{project} 记录重复")
-            return
+            return False
         except Exception as e:
             logging.error(f"{project} 插入  MySQL 失败: {e}")
-            raise Exception(f"{project} 插入  MySQL 失败: {e}")
-
-    def inserts(self, projects: List[Project]):
-        try:
-            for p in projects:
-                self.insert(p)
-                time.sleep(0.1)
-        except Exception as e:
-            logging.error(f"插入项目列表失败: {e}")
-            raise Exception(f"插入项目列表失败: {e}")
+            return False
+        return True
 
     def close(self):
         self.connection.close()

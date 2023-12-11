@@ -33,6 +33,8 @@ header:
     - '**/**.yml'
     - '**/**.yaml'
     - '**/**.sql'
+    - '**/translate/utils/**'
+    - '**/translate/Translate.java'
 
   comment: on-failure
 
