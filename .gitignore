@@ -1,7 +1,9 @@
-.idea/
-target/
+.idea
+.vscode
+target
 **/config.yaml
 **/**.pyc
+.DS_Store
 
 # Logs
 gift-web/logs

@@ -35,6 +35,8 @@ header:
     - '**/**.sql'
     - '**/translate/utils/**'
     - '**/translate/Translate.java'
+    - 'gift-web/**'
+    -
 
   comment: on-failure
 
