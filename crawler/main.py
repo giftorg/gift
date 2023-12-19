@@ -38,7 +38,7 @@ def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
 
     # TODO: 实现更好的数据采集策略
     desc = 'java%20web%20mysql'
-    url = f'https://api.github.com/search/repositories?q={desc}+in:name+in:readme+in:description+language:{lang}&sort=stars&page={page}&per_page={count}'
+    url = f'https://api.github.com/search/repositories?q={desc}+in:name+in:readme+in:description+language:{lang}+created:>2023-01-01&sort=stars&page={page}&per_page={count}'
     logging.info(f"正在获取：{url} ...")
     resp = requests.get(url)
     if resp.status_code != 200:

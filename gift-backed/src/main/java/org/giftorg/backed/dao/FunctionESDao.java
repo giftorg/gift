@@ -1,15 +1,15 @@
 /**
  * Copyright 2023 GiftOrg Authors
- * <p>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,13 +17,10 @@
  * limitations under the License.
  */
 
-package org.giftorg.analyze.dao;
+package org.giftorg.backed.dao;
 
-import cn.hutool.core.lang.func.Func;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
 import lombok.extern.slf4j.Slf4j;
-import org.giftorg.analyze.entity.Function;
+import org.giftorg.backed.entity.code.Function;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
@@ -121,7 +118,7 @@ public class FunctionESDao implements Serializable {
 
     public static void main(String[] args) throws Exception {
 //        init();
-//        testEmbedding("Redis如何设置分布式锁");
+        testEmbedding("Redis如何设置分布式锁");
         Elasticsearch.close();
     }
 

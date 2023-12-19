@@ -1,0 +1,19 @@
+server:
+  port: 8000
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://mysql:23306/gift?useSSL=false&serverTimezone=UTC
+      username: root
+      password: root
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          connection-timeout: 10000
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
