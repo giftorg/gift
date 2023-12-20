@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-package org.giftorg.analyze.dao;
+package org.giftorg.backed.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.giftorg.analyze.entity.Function;
+import org.giftorg.backed.entity.code.Function;
 import org.giftorg.common.elasticsearch.Elasticsearch;
 
 import java.io.IOException;
@@ -118,7 +118,7 @@ public class FunctionESDao implements Serializable {
 
     public static void main(String[] args) throws Exception {
 //        init();
-//        testEmbedding("Redis如何设置分布式锁");
+        testEmbedding("Redis如何设置分布式锁");
         Elasticsearch.close();
     }
 

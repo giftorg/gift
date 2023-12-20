@@ -1,4 +1,31 @@
-.idea/
-target/
+.idea
+.vscode
+target
 **/config.yaml
 **/**.pyc
+.DS_Store
+
+# Logs
+gift-web/logs
+gift-web/*.log
+gift-web/npm-debug.log*
+gift-web/yarn-debug.log*
+gift-web/yarn-error.log*
+gift-web/pnpm-debug.log*
+gift-web/lerna-debug.log*
+
+gift-web/node_modules
+gift-web/dist
+gift-web/dist-ssr
+*.local
+
+# Editor directories and files
+gift-web/.vscode/*
+gift-web/!.vscode/extensions.json
+gift-web/.idea
+gift-web/.DS_Store
+gift-web/*.suo
+gift-web/*.ntvs*
+gift-web/*.njsproj
+gift-web/*.sln
+gift-web/*.sw?

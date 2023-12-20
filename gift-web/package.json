@@ -1,0 +1,29 @@
+{
+  "name": "gift-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@highlightjs/vue-plugin": "^2.1.0",
+    "axios": "^1.6.2",
+    "highlight.js": "^11.9.0",
+    "json-bigint": "^1.0.0",
+    "lottie-web": "^5.12.2",
+    "pinia": "^2.1.7",
+    "semantic-ui-css": "^2.5.0",
+    "semantic-ui-vue": "^0.11.0",
+    "vue": "^3.3.11",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "less": "^4.2.0",
+    "vite": "^5.0.8"
+  }
+}

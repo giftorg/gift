@@ -1,0 +1,23 @@
+:root,
+body {
+    margin: 0;
+    padding: 0;
+
+    --bak-color: #ffffff;
+
+    --cark-color: #ffffff;
+}
+
+.max-height {
+    height: 100vh;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
