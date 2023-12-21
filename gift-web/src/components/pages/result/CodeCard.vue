@@ -40,8 +40,12 @@ const props = defineProps({
 
 const code = reactive(props.code)
 
-code.rpath = code.filePath.replace('/gift/repositories/', '').replace(code.project.fullName, '')
-code.path = 'https://github.com/' + code.project.fullName + '/tree/' + code.project.defaultBranch + code.rpath + '#L' + code.begin.line
+code.rpath = code.filePath.replace('/gift/repositories/', '').replace(code.project.fullName, '').replace(`${code.project.name}/`, '')
+code.path = 'https://githubfast.com/' + code.project.fullName + '/tree/' + code.project.defaultBranch + code.rpath + '#L' + code.begin.line
+
+function searchTech(tech) {
+  location.href = `/search/code?query=${tech}`
+}
 
 </script>
 
@@ -57,7 +61,7 @@ code.path = 'https://github.com/' + code.project.fullName + '/tree/' + code.proj
     <div class="card-footer">
       <div class="card-desc">{{code.description}}</div>
       <div class="card-techs">
-        <div class="card-tech" v-for="tech in code.technologyStack.split(' ')" :key="tech">{{tech}}</div>
+        <div class="card-tech" v-for="tech in code.technologyStack.split(' ')" :key="tech" @click="searchTech(tech)">{{tech}}</div>
       </div>
     </div>
   </div>

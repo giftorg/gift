@@ -52,14 +52,14 @@ function search(query) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--bak-color);
-  //background: url("@/assets/images/img.png");
-  //background-size: 100%;
-  //background-position: center;
+  //background: var(--bak-color);
+  background: url("@/assets/images/background_7.png");
+  background-size: 100%;
+  background-position: center;
 
   .index-container {
     flex: 1;
-    padding-top: 200px;
+    padding-top: 8vh;
   }
 
   .selector {

@@ -3,7 +3,7 @@ import JSONBIG from 'json-bigint'
 
 const instance = axios.create({
   baseURL: '/api',
-  timeout: 5000,
+  timeout: 100000,
   transformResponse: [
     (data) => {
       const json = JSONBIG({
