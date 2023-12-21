@@ -29,6 +29,7 @@ from mq.mq import *
 
 pd = ProjectDao('mysql', 23306, 'root', 'root', 'gift')
 mq = CrawlerMQ('kafka:9092')
+repo_set: set[str] = pd.get_repo_set()
 
 
 def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
@@ -37,8 +38,8 @@ def getGithubRepoList(lang: str, page: int, count: int) -> List[Project]:
     """
 
     # TODO: 实现更好的数据采集策略
-    desc = 'java%20web%20mysql'
-    url = f'https://api.github.com/search/repositories?q={desc}+in:name+in:readme+in:description+language:{lang}+created:>2023-01-01&sort=stars&page={page}&per_page={count}'
+    desc = 'spring'
+    url = f'https://api.github.com/search/repositories?q={desc}+in:name+in:readme+in:description+language:{lang}&sort=stars&page={page}&per_page={count}'
     logging.info(f"正在获取：{url} ...")
     resp = requests.get(url)
     if resp.status_code != 200:
@@ -110,13 +111,14 @@ def init_task_queue() -> Queue:
 
 # 持久化项目列表
 def save_project_list(projects):
-    try:
-        for p in projects:
-            if pd.insert(p):
+    for p in projects:
+        if p.id not in repo_set:
+            try:
+                pd.insert(p)
                 mq.publish(CRAWLER_TOPIC, CrawlerTask(p.id, DEFAULT_RETRY_COUNT))
+            except Exception as e:
+                logging.error(f'插入项目 {p} 失败：{e}')
             time.sleep(0.2)
-    except Exception as e:
-        raise Exception(f"持久化项目列表失败：{e}")
 
 
 if __name__ == '__main__':
@@ -138,3 +140,4 @@ if __name__ == '__main__':
         time.sleep(1)
 
     pd.close()
+

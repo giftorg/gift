@@ -18,9 +18,9 @@ const props = defineProps({
 </script>
 
 <template>
-  <div id="card">
+  <div id="card" v-show="props?.project?.readmeCn?.length > 0">
     <div class="project-full-name">
-      <a :href="`https://github.com/${props.project.fullName}`" target="_blank">{{ props.project.fullName }}</a>
+      <a :href="`https://githubfast.com/${props.project.fullName}`" target="_blank">{{ props.project.fullName }}</a>
     </div>
     <div class="project-desc">
       {{ props.project.description }}

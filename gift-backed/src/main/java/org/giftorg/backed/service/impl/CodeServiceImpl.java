@@ -50,6 +50,7 @@ public class CodeServiceImpl implements CodeService {
     public List<FunctionVo> searchCode(String keys) {
         try {
             List<Function> functions = fd.retrieval(keys);
+            log.info("retrieval");
             ArrayList<FunctionVo> functionVos = new ArrayList<>();
             for (Function function : functions) {
                 FunctionVo functionVo = new FunctionVo();

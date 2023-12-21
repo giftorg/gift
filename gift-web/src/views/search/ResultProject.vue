@@ -13,18 +13,17 @@ const router = useRouter()
 const projects = reactive([])
 
 function search(query) {
-  router.push(`?query=${query}`)
+  location.href = `/search/project?query=${query}`
+}
+
+onMounted(() => {
+  const query = route.query.query
   getSearchProject(query).then(res => {
     projects.length = 0
     for (let p of res.data) {
       projects.push(p)
     }
   })
-}
-
-onMounted(() => {
-  const query = route.query.query
-  search(query)
 })
 </script>
 

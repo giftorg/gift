@@ -62,9 +62,11 @@ function enter(event) {
       border: none;
       outline: none;
       font-size: 16px;
+      background-color: rgba(0, 0, 0, 0);
 
       :focus {
         border: none;
+        background-color: rgba(0, 0, 0, 0);
       }
     }
   }
