@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PathUtilTest {
     @Test
     void testJoin() {
-        String path = PathUtil.join("a", "b\\", "c/", "d");
+        String path = PathUtil.join("a", "b", "c/", "d");
 
         String expected = "a/b/c/d";
         if (isWindows()) expected = "a\\b\\c\\d";

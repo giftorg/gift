@@ -19,6 +19,7 @@
 
 package org.giftorg.common.config;
 
+import cn.hutool.core.io.resource.ClassPathResource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.SparkFiles;
 import org.yaml.snakeyaml.Yaml;
@@ -62,26 +63,18 @@ public class Config {
                 in = Files.newInputStream(Paths.get(configPath));
                 log.info("config path: {}", configPath);
             } catch (Exception e) {
+                log.error("init config failed: {}", e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         } else {
             configPath = DEFAULT_CONFIG_PATH;
-
             try {
-                URI uri = ClassLoader.getSystemResource(configPath).toURI();
-                in = Files.newInputStream(Paths.get(uri));
-                log.info("config path: {}", uri.getPath());
-            } catch (Exception ignore) {
-                try {
-                    URI uri = ClassLoader.getSystemResource(configPath).toURI();
-                    Map<String, String> env = new HashMap<>();
-                    env.put("create", "true");
-                    FileSystems.newFileSystem(uri, env);
-                    in = Files.newInputStream(Paths.get(uri));
-                    log.info("config path: {}", uri.getPath());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                ClassPathResource configResource = new ClassPathResource(configPath);
+                in = configResource.getStream();
+                log.info("config path: {}", configResource.getPath());
+            } catch (Exception e) {
+                log.error("init config failed: {}", e.getMessage(), e);
+                throw new RuntimeException(e);
             }
         }
 
