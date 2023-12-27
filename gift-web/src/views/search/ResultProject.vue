@@ -2,9 +2,9 @@
 import ProjectCard from '@/components/pages/result/ProjectCard.vue'
 import Nav from '@/components/common/Nav.vue'
 import Footer from '@/components/common/Footer.vue'
-import { useRoute, useRouter } from 'vue-router'
-import { onMounted, reactive } from 'vue'
-import { getSearchProject } from '@/services/search/index.js'
+import {useRoute, useRouter} from 'vue-router'
+import {onMounted, reactive} from 'vue'
+import {getSearchProject} from '@/services/search/index.js'
 import SearchInput from '@/components/common/SearchInput.vue'
 
 const route = useRoute()
@@ -20,9 +20,15 @@ onMounted(() => {
   const query = route.query.query
   getSearchProject(query).then(res => {
     projects.length = 0
+    const pset = new Set()
     for (let p of res.data) {
-      projects.push(p)
+      const repoId = p['repoId']
+      if (!pset.has(repoId)) {
+        projects.push(p)
+        pset.add(repoId)
+      }
     }
+    console.log(pset)
   })
 })
 </script>
@@ -37,7 +43,7 @@ onMounted(() => {
     </div>
 
     <div class="results ui container">
-      <div class="result" v-for="p in projects" :key="p.id">
+      <div class="result" v-for="p in projects" :key="p.id" v-show="p?.readmeCn?.length">
         <ProjectCard :project="p"></ProjectCard>
       </div>
     </div>
