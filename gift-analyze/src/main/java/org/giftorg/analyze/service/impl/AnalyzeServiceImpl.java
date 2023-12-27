@@ -1,15 +1,15 @@
 /**
  * Copyright 2023 GiftOrg Authors
- *
+ * <p>
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,15 +63,20 @@ public class AnalyzeServiceImpl implements AnalyzeService {
         // 获取仓库中所有文件
         List<String> files = HDFS.getRepoFiles(repository.getHdfsPath());
 
-        files.forEach(file -> {
+        String readme = null;
+        for (String file : files) {
             if (file.endsWith("README.md")) {
-                // 如果文件为README文档，则进行文档分析
-                handleDoc(repository, file);
+                if (readme == null) {
+                    readme = file;
+                }
             } else {
                 // 其它文件进行代码分析
                 analyzeCode(repository.getId(), file);
             }
-        });
+        }
+
+        // 项目文档分析
+        handleDoc(repository, readme);
     }
 
     /**

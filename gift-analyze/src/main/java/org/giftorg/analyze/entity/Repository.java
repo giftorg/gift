@@ -92,13 +92,13 @@ public class Repository implements Serializable, Cloneable {
     public void translation() throws Exception {
         if (isTranslated) return;
         if (!CharsetUtil.isChinese(readme)) {
-            BigModel xingHuo = new XingHuo();
+            BigModel xingHuo = new ChatGPT();
             List<BigModel.Message> messages = readmeContentMessages();
             messages.add(new BigModel.Message("user", REPOSITORY_TRANSLATION_PROMPT));
             readmeCn = xingHuo.chat(messages);
             // TODO: 添加更优的判断方式
             // TODO: 根据星火响应的特征，失败时一般会响应 “很抱歉，您没有提供任何文档或链接供我删除无关内容。请提供相关文档或链接，我将为您删除其中的无关内容并使用中文概括核心文本描述。”
-            if (readmeCn.contains("抱歉") || readmeCn.contains("对不起"))
+            if (readmeCn.isEmpty() || readmeCn.contains("抱歉") || readmeCn.contains("对不起"))
                 throw new Exception("translation failed, xinghuo response: " + readmeCn);
         } else {
             readmeCn = readme;
